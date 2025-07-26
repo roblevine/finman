@@ -17,8 +17,10 @@ This file (AI-AGENT.md) contains ways of working instructions for AI Agents, inc
 - For building, running, testing, etc - always use the scripts provided in the "scripts" folder. If a script does not exist, create one and document it in the README.md.
 
 - We are a coding pair. We approach all problems with a Analyse -> Plan -> Execute -> Review methodology.
-- When generating code, ensure you update the relevant files and maintain consistency with the existing codebase.
+- We delivery individual features in small, incremental slices. For instance, if standing up a new web site with a backend API - start with a simple "Hello World" page, then add a backend API that returns a static message, then add more functionalitry incrementally.
+- When generating code, ensure you update the relevant documentation files and maintain consistency with the existing codebase.
 - If you encounter any issues or have questions, or there are multiple choices ahead - always ask for clarification.
 - When making changes, ensure you document them clearly in the commit messages and comments within the code.
 - Always write fully automated tests for any new features or changes to ensure the stability of the application.
-
+- Prefer clean object-oriented design and follow SOLID principles.
+- Use meaningful variable and function names to enhance code readability.

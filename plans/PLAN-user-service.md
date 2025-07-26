@@ -1,146 +1,241 @@
-# PLAN: User Service Implementation
+# User Service Implementation Plan
 
-## Analysis
+## Overview
+This plan outlines the implementation of a user registration and management service for the Finman application, following the Analyse -> Plan -> Execute -> Review methodology with incremental delivery.
 
-### Current State
-- Finman project with .NET microservices architecture
-- Next.js frontend planned
-- Container-based deployment
-- Empty codebase ready for first microservice implementation
+## Architecture
 
-### Requirements
-- User registration and authentication system
-- Foundation for investment tracking users
-- Standard user management functionality
-- Scalable microservice architecture
+### Backend (.NET Microservice)
+- **Framework**: ASP.NET Core 8 Web API
+- **Database**: PostgreSQL with Entity Framework Core
+- **Authentication**: JWT tokens
+- **Containerization**: Docker
+- **Testing**: xUnit, Moq
 
-## Plan
+### Frontend (Next.js)
+- **Framework**: Next.js 14 with TypeScript
+- **Styling**: TailwindCSS
+- **State Management**: React Context/Zustand
+- **HTTP Client**: Axios
+- **Testing**: Jest, React Testing Library
 
-### Phase 1: Backend User Service (.NET)
+### Infrastructure
+- **Containerization**: Docker Compose for local development
+- **Database**: PostgreSQL container
+- **Reverse Proxy**: Nginx (future)
 
-#### 1.1 Project Structure Setup
-- Create ASP.NET Core 8 Web API project
-- Set up Clean Architecture with:
-  - `UserService.API` - Controllers and API layer
-  - `UserService.Core` - Domain entities and business logic
-  - `UserService.Infrastructure` - Data access and external services
-  - `UserService.Tests` - Unit and integration tests
+## Incremental Delivery Phases
 
-#### 1.2 Database Design
-- User entity with core fields:
-  - Id, Email, PasswordHash, FirstName, LastName
-  - CreatedAt, UpdatedAt, IsEmailVerified, IsActive
-- Implement Entity Framework Core with PostgreSQL
-- Database migrations for user schema
+### Phase 1: Foundation ("Hello World")
+**Goal**: Establish basic project structure and connectivity
 
-#### 1.3 Authentication & Security
-- ASP.NET Core Identity integration
-- JWT token authentication
-- Password hashing with secure algorithms
-- Email verification workflow
+**Backend Tasks:**
+- Create ASP.NET Core Web API project
+- Add basic "Hello World" controller
+- Configure Docker containerization
+- Set up development scripts
+
+**Frontend Tasks:**
+- Create Next.js TypeScript project
+- Add basic "Hello World" page
+- Configure TailwindCSS
+- Set up API communication
+
+**Deliverable**: Working containerized setup with basic connectivity
+
+### Phase 2: User Registration
+**Goal**: Implement user registration functionality
+
+**Backend Tasks:**
+- Design User entity model
+- Configure Entity Framework Core with PostgreSQL
+- Implement user registration endpoint
+- Add input validation
+- Create database migration
+
+**Frontend Tasks:**
+- Create user registration form
+- Add form validation
+- Implement API integration
+- Add success/error handling
+
+**Deliverable**: Users can register with email/password
+
+### Phase 3: User Authentication
+**Goal**: Implement login and JWT authentication
+
+**Backend Tasks:**
+- Implement login endpoint
+- Add JWT token generation
+- Configure authentication middleware
+- Add password hashing (BCrypt)
+
+**Frontend Tasks:**
+- Create login form
+- Implement JWT token storage
+- Add authentication context
+- Create protected route wrapper
+
+**Deliverable**: Users can login and receive JWT tokens
+
+### Phase 4: Protected Routes & User Management
+**Goal**: Secure API endpoints and basic user management
+
+**Backend Tasks:**
+- Add authorization to protected endpoints
+- Implement user profile endpoints (GET, PUT)
+- Add user validation and error handling
+
+**Frontend Tasks:**
+- Implement protected pages
+- Create user profile page
+- Add logout functionality
+- Implement token refresh logic
+
+**Deliverable**: Complete user authentication and basic profile management
+
+### Phase 5: Enhanced User Features
+**Goal**: Advanced user management features
+
+**Backend Tasks:**
+- Email verification (optional)
 - Password reset functionality
+- User role management
+- Audit logging
 
-#### 1.4 API Endpoints
-- POST /api/users/register - User registration
-- POST /api/users/login - User authentication
-- GET /api/users/profile - Get user profile
-- PUT /api/users/profile - Update user profile
-- POST /api/users/forgot-password - Password reset request
-- POST /api/users/reset-password - Password reset confirmation
-- POST /api/users/verify-email - Email verification
+**Frontend Tasks:**
+- Email verification flow
+- Password reset forms
+- User settings page
+- Enhanced error handling
 
-### Phase 2: Frontend User Interface (Next.js)
+**Deliverable**: Production-ready user management system
 
-#### 2.1 Authentication Pages
-- Registration form with validation
-- Login form with remember me option
-- Password reset request form
-- Password reset confirmation form
-- Email verification page
+## Technical Specifications
 
-#### 2.2 User Management Components
-- User profile display and edit components
-- Protected route components
-- Authentication context and hooks
-- Form validation and error handling
+### Database Schema
+```sql
+Users Table:
+- Id (UUID, Primary Key)
+- Email (string, unique, required)
+- PasswordHash (string, required)
+- FirstName (string, required)
+- LastName (string, required)
+- CreatedAt (datetime)
+- UpdatedAt (datetime)
+- IsEmailVerified (boolean)
+- IsActive (boolean)
+```
 
-#### 2.3 State Management
-- User authentication state management
-- API integration with React Query/SWR
-- Local storage for JWT tokens
-- Automatic token refresh handling
+### API Endpoints
+```
+POST /api/auth/register - User registration
+POST /api/auth/login - User login
+POST /api/auth/refresh - Refresh JWT token
+GET /api/users/profile - Get user profile
+PUT /api/users/profile - Update user profile
+POST /api/auth/logout - Logout user
+```
 
-### Phase 3: Infrastructure & Deployment
-
-#### 3.1 Containerization
-- Dockerfile for .NET API service
-- Dockerfile for Next.js frontend
-- Docker Compose for local development
-- PostgreSQL container configuration
-
-#### 3.2 Configuration Management
-- Environment-specific configuration
-- Secrets management for database connections
-- CORS configuration for frontend integration
-- Logging and monitoring setup
-
-#### 3.3 Testing Strategy
-- Unit tests for business logic
-- Integration tests for API endpoints
-- Frontend component testing with Jest/RTL
-- E2E testing with Playwright
-
-### Phase 4: Security & Production Readiness
-
-#### 4.1 Security Hardening
+### Security Considerations
+- Password hashing using BCrypt
+- JWT tokens with appropriate expiration
 - Input validation and sanitization
-- Rate limiting for authentication endpoints
-- HTTPS enforcement
-- Security headers configuration
+- HTTPS in production
+- CORS configuration
+- Rate limiting (future)
 
-#### 4.2 Monitoring & Logging
-- Structured logging with Serilog
-- Health checks for service monitoring
-- Performance metrics collection
-- Error tracking and alerting
+## File Structure
 
-## Execute
+### Backend (UserService/)
+```
+UserService/
+├── Controllers/
+│   ├── AuthController.cs
+│   └── UsersController.cs
+├── Models/
+│   ├── User.cs
+│   ├── RegisterRequest.cs
+│   └── LoginRequest.cs
+├── Data/
+│   ├── UserContext.cs
+│   └── Migrations/
+├── Services/
+│   ├── IAuthService.cs
+│   ├── AuthService.cs
+│   ├── IUserService.cs
+│   └── UserService.cs
+├── Program.cs
+├── appsettings.json
+├── Dockerfile
+└── UserService.csproj
+```
 
-### Implementation Order
-1. Backend API service foundation
-2. Database schema and Entity Framework setup
-3. Authentication and user management endpoints
-4. Basic frontend authentication flow
-5. User profile management features
-6. Containerization and deployment configuration
-7. Testing suite implementation
-8. Security and monitoring features
+### Frontend (frontend/)
+```
+frontend/
+├── pages/
+│   ├── auth/
+│   │   ├── login.tsx
+│   │   └── register.tsx
+│   ├── profile/
+│   │   └── index.tsx
+│   └── index.tsx
+├── components/
+│   ├── auth/
+│   │   ├── LoginForm.tsx
+│   │   └── RegisterForm.tsx
+│   └── layout/
+│       └── Layout.tsx
+├── contexts/
+│   └── AuthContext.tsx
+├── services/
+│   └── api.ts
+├── types/
+│   └── user.ts
+├── package.json
+├── tailwind.config.js
+└── Dockerfile
+```
 
-### Success Criteria
-- Users can register with email verification
-- Users can login/logout securely
-- Users can manage their profiles
-- Service is containerized and deployable
-- Comprehensive test coverage (>80%)
-- Security best practices implemented
-- Documentation for API and deployment
+## Development Scripts
+All scripts will be created in the `/scripts` folder:
+- `setup.sh` - Initial project setup
+- `build.sh` - Build all services
+- `run.sh` - Run development environment
+- `test.sh` - Run all tests
+- `clean.sh` - Clean build artifacts
 
-## Review
+## Testing Strategy
+- Unit tests for all service methods
+- Integration tests for API endpoints
+- Frontend component tests
+- End-to-end tests for critical user flows
+- Database integration tests
 
-### Testing Checklist
-- [ ] All API endpoints tested and documented
-- [ ] Frontend authentication flow works end-to-end
-- [ ] Database migrations run successfully
-- [ ] Docker containers build and run correctly
-- [ ] Security vulnerabilities scanned and addressed
-- [ ] Performance benchmarks meet requirements
-- [ ] Code review completed
-- [ ] Documentation updated
+## Success Criteria
+- Users can register with email/password
+- Users can login and receive JWT tokens
+- Protected routes work correctly
+- User profile management is functional
+- All endpoints have proper validation
+- Frontend provides good UX with error handling
+- Code coverage > 80%
+- All tests pass
+- Docker containerization works
+- Documentation is complete
 
-### Future Considerations
-- Integration with investment tracking service
-- Admin user management features
-- OAuth integration (Google, Microsoft)
-- Multi-factor authentication
-- User preference management
-- Audit logging for user actions
+## Timeline Estimate
+- Phase 1: 1-2 days
+- Phase 2: 2-3 days
+- Phase 3: 2-3 days
+- Phase 4: 1-2 days
+- Phase 5: 2-3 days
+
+**Total: 8-13 days** (depending on scope and complexity)
+
+## Dependencies
+- .NET 8 SDK
+- Node.js 18+
+- Docker & Docker Compose
+- PostgreSQL
