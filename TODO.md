@@ -10,7 +10,7 @@ Items to be implemented will be listed at the high level only here. More detaile
 ### User Service Implementation
 **Status**: Planning Complete  
 **Plan Document**: [PLAN-user-service.md](plans/PLAN-user-service.md)  
-**Description**: Complete user registration and management system with .NET microservice backend and Next.js frontend. Includes authentication, profile management, and security features.
+**Description**: Backend user registration and management API service using .NET microservice. Includes authentication, profile management, and security features. UI will be implemented later as a unified frontend for multiple backend services.
 
 **Phases**:
 - [ ] Phase 1: Foundation setup with "Hello World"
