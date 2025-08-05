@@ -1,16 +1,17 @@
 # User Service Implementation Plan
 
 ## Overview
-This plan outlines the implementation of a user registration and management backend service for the Finman application, following the Analyse -> Plan -> Execute -> Review methodology with incremental delivery. The UI will be implemented later as a unified frontend for multiple backend services.
+This plan outlines the implementation of a user registration and management backend service for the Finman application, following the Analyse -> Plan -> Execute -> Review methodology with incremental delivery. **The backend APIs are being built first - the UI will be implemented later as a unified frontend that operates across multiple backend services.**
 
 ## Architecture
 
 ### Backend (.NET Microservice)
 - **Framework**: ASP.NET Core 8 Web API
+- **Architecture**: Hexagonal Architecture (Ports and Adapters)
 - **Database**: PostgreSQL with Entity Framework Core
 - **Authentication**: JWT tokens
 - **Containerization**: Docker
-- **Testing**: xUnit, Moq
+- **Testing**: xUnit with hand-written mocks
 
 ### Infrastructure
 - **Containerization**: Docker Compose for local development
@@ -123,24 +124,50 @@ POST /api/auth/logout - Logout user
 
 ## File Structure
 
-### Backend (UserService/)
+### Backend (UserService/) - Hexagonal Architecture
 ```
 UserService/
-├── Controllers/
-│   ├── AuthController.cs
-│   └── UsersController.cs
-├── Models/
-│   ├── User.cs
-│   ├── RegisterRequest.cs
-│   └── LoginRequest.cs
-├── Data/
-│   ├── UserContext.cs
-│   └── Migrations/
-├── Services/
-│   ├── IAuthService.cs
-│   ├── AuthService.cs
-│   ├── IUserService.cs
-│   └── UserService.cs
+├── Domain/ (Core)
+│   ├── Entities/
+│   │   └── User.cs
+│   ├── Services/
+│   │   ├── IUserDomainService.cs
+│   │   └── UserDomainService.cs
+│   └── ValueObjects/
+├── Application/ (Use Cases)
+│   ├── UseCases/
+│   │   ├── RegisterUser/
+│   │   ├── AuthenticateUser/
+│   │   └── GetUserProfile/
+│   ├── Ports/
+│   │   ├── IUserRepository.cs
+│   │   ├── IAuthService.cs
+│   │   └── IPasswordHasher.cs
+│   └── DTOs/
+│       ├── RegisterRequest.cs
+│       └── LoginRequest.cs
+├── Infrastructure/ (Adapters)
+│   ├── Persistence/
+│   │   ├── UserContext.cs
+│   │   ├── Repositories/
+│   │   │   └── UserRepository.cs
+│   │   └── Migrations/
+│   ├── Security/
+│   │   ├── JwtAuthService.cs
+│   │   └── BCryptPasswordHasher.cs
+│   └── Web/
+│       ├── Controllers/
+│       │   ├── AuthController.cs
+│       │   └── UsersController.cs
+│       └── Middleware/
+├── Tests/
+│   ├── Domain.Tests/
+│   ├── Application.Tests/
+│   │   └── Mocks/ (Hand-written mocks)
+│   │       ├── MockUserRepository.cs
+│   │       ├── MockAuthService.cs
+│   │       └── MockPasswordHasher.cs
+│   └── Infrastructure.Tests/
 ├── Program.cs
 ├── appsettings.json
 ├── Dockerfile
@@ -157,12 +184,19 @@ All scripts will be created in the `/scripts` folder:
 - `clean.sh` - Clean build artifacts
 
 ## Testing Strategy
-- Unit tests for all service methods and business logic
-- Integration tests for all API endpoints
-- Database integration tests with test containers
-- Authentication and authorization tests
-- Performance and load testing
-- API contract testing with OpenAPI validation
+- **Unit tests** for domain entities and use cases using hand-written mocks
+- **Integration tests** for all API endpoints
+- **Database integration tests** with test containers
+- **Authentication and authorization tests**
+- **Performance and load testing**
+- **API contract testing** with OpenAPI validation
+
+### Hand-Written Mock Guidelines
+- Create reusable mock implementations in `Tests/Application.Tests/Mocks/`
+- Mocks should implement the same interfaces as real adapters
+- Include configurable behavior for different test scenarios
+- Maintain simple, readable mock implementations
+- Use builder pattern for complex mock setups when needed
 
 ## Success Criteria
 - API endpoints for user registration and authentication
