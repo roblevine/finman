@@ -15,10 +15,8 @@ dotnet build --no-restore --configuration Release
 echo "🧪 Running tests..."
 dotnet test --no-build --configuration Release --verbosity normal
 
-echo "🐳 Building Docker image..."
-docker build -t finman-userservice:latest src/UserService/
-
 echo "✅ Build completed successfully!"
 echo ""
-echo "Docker image 'finman-userservice:latest' is ready to use."
-echo "Run './scripts/run.sh' to start the containerized service."
+echo "ℹ️  Note: Docker image building is skipped in dev container environment."
+echo "   To build Docker images, run this script on the host or configure DooD."
+echo "Run './scripts/run.sh --local' to start the service locally."
