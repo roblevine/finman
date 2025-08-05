@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "src\UserService\UserService.csproj", "{916D6201-2C9A-4F38-818A-27CB4119784A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Tests", "tests\Infrastructure.Tests\Infrastructure.Tests.csproj", "{72891897-F573-4AF1-AEE6-C089B3DB0403}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{916D6201-2C9A-4F38-818A-27CB4119784A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{916D6201-2C9A-4F38-818A-27CB4119784A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{916D6201-2C9A-4F38-818A-27CB4119784A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{916D6201-2C9A-4F38-818A-27CB4119784A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72891897-F573-4AF1-AEE6-C089B3DB0403}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72891897-F573-4AF1-AEE6-C089B3DB0403}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72891897-F573-4AF1-AEE6-C089B3DB0403}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72891897-F573-4AF1-AEE6-C089B3DB0403}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

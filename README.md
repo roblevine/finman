@@ -1,3 +1,5 @@
+**IMPORTANT - PLEASE READ the AI-AGENT.md file for more information on the rules and guidance on contributing to this project.
+
 # Introduction
 
 Welcome to the Finman project.
