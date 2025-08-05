@@ -2,26 +2,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy project files
-COPY UserService.csproj .
-COPY Tests/Domain.Tests/Domain.Tests.csproj Tests/Domain.Tests/
-COPY Tests/Application.Tests/Application.Tests.csproj Tests/Application.Tests/
-COPY Tests/Infrastructure.Tests/Infrastructure.Tests.csproj Tests/Infrastructure.Tests/
-
-# Restore dependencies
-RUN dotnet restore UserService.csproj
-
-# Copy all source code
+# Copy everything and restore
 COPY . .
+RUN dotnet restore FinmanUserService.sln
 
-# Run tests
-RUN dotnet test --no-restore --verbosity normal
-
-# Build the application
-RUN dotnet build UserService.csproj -c Release --no-restore
+# Build and test
+RUN dotnet build FinmanUserService.sln -c Release --no-restore
+RUN dotnet test --no-build --configuration Release --verbosity normal
 
 # Publish the application
-RUN dotnet publish UserService.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish src/UserService/UserService.csproj -c Release -o /app/publish --no-restore
 
 # Use the official .NET 8 runtime image for the final stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
