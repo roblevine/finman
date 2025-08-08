@@ -21,6 +21,6 @@ This file (AI-AGENT.md) contains ways of working instructions for AI Agents, inc
 - When generating code, ensure you update the relevant documentation files and maintain consistency with the existing codebase.
 - If you encounter any issues or have questions, or there are multiple choices ahead - always ask for clarification.
 - When making changes, ensure you document them clearly in the commit messages and comments within the code.
-- Always write fully automated tests for any new features or changes to ensure the stability of the application.
+- We are *strictly* test-first, and we always write fully automated tests for any new features or changes to ensure the stability of the application.
 - Prefer clean object-oriented design and follow SOLID principles.
 - Use meaningful variable and function names to enhance code readability.

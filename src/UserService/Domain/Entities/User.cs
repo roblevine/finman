@@ -48,46 +48,4 @@ public class User
     public DateTime? DeletedAt { get; private set; }
 
     public string FullName => $"{FirstName} {LastName}";
-
-    public void UpdateProfile(PersonName firstName, PersonName lastName)
-    {
-        FirstName = firstName;
-        LastName = lastName;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void UpdatePassword(string newPasswordHash)
-    {
-        if (string.IsNullOrWhiteSpace(newPasswordHash))
-            throw new UserDomainException("Password hash cannot be empty");
-
-        PasswordHash = newPasswordHash;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void Deactivate()
-    {
-        IsActive = false;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void Activate()
-    {
-        IsActive = true;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void SoftDelete()
-    {
-        IsDeleted = true;
-        DeletedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void Restore()
-    {
-        IsDeleted = false;
-        DeletedAt = null;
-        UpdatedAt = DateTime.UtcNow;
-    }
 }
