@@ -1,0 +1,9 @@
+
+
+---
+description: Default rules for project
+globs:
+alwaysApply: true
+---
+
+- Always start by reading AI-AGENT.md
