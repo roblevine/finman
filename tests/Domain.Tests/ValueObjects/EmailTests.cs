@@ -1,5 +1,4 @@
 using System;
-using FluentAssertions;
 using UserService.Domain.ValueObjects;
 using Xunit;
 
@@ -17,7 +16,7 @@ public class EmailTests
         var email = new Email(validEmail);
 
         // Assert
-        email.Value.Should().Be("user@example.com");
+        Assert.Equal("user@example.com", email.Value);
     }
 
     [Fact]
@@ -30,7 +29,7 @@ public class EmailTests
         var email = new Email(validEmail);
 
         // Assert
-        email.Value.Should().Be("user@example.com");
+        Assert.Equal("user@example.com", email.Value);
     }
 
     [Theory]
@@ -41,9 +40,8 @@ public class EmailTests
     public void Create_WithEmptyOrWhitespace_ShouldThrowArgumentException(string invalidEmail)
     {
         // Act & Assert
-        var action = () => new Email(invalidEmail);
-        action.Should().Throw<ArgumentException>()
-            .WithMessage("Email cannot be empty*");
+        var exception = Assert.Throws<ArgumentException>(() => new Email(invalidEmail));
+        Assert.StartsWith("Email cannot be empty", exception.Message);
     }
 
     [Theory]
@@ -55,9 +53,8 @@ public class EmailTests
     public void Create_WithInvalidFormat_ShouldThrowArgumentException(string invalidEmail)
     {
         // Act & Assert
-        var action = () => new Email(invalidEmail);
-        action.Should().Throw<ArgumentException>()
-            .WithMessage("Invalid email format*");
+        var exception = Assert.Throws<ArgumentException>(() => new Email(invalidEmail));
+        Assert.StartsWith("Invalid email format", exception.Message);
     }
 
     [Fact]
@@ -70,7 +67,7 @@ public class EmailTests
         var email = new Email(emailWithWhitespace);
 
         // Assert
-        email.Value.Should().Be("user@example.com");
+        Assert.Equal("user@example.com", email.Value);
     }
 
     [Fact]
@@ -83,7 +80,7 @@ public class EmailTests
         string result = email;
 
         // Assert
-        result.Should().Be("user@example.com");
+        Assert.Equal("user@example.com", result);
     }
 
     [Fact]
@@ -96,6 +93,6 @@ public class EmailTests
         var email = (Email)emailString;
 
         // Assert
-        email.Value.Should().Be("user@example.com");
+        Assert.Equal("user@example.com", email.Value);
     }
 }

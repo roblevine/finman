@@ -22,5 +22,6 @@ This file (AI-AGENT.md) contains ways of working instructions for AI Agents, inc
 - If you encounter any issues or have questions, or there are multiple choices ahead - always ask for clarification.
 - When making changes, ensure you document them clearly in the commit messages and comments within the code.
 - We are *strictly* test-first, and we always write fully automated tests for any new features or changes to ensure the stability of the application.
+- Always discuss before bringing in new dependencies/packages, as I might have preferences or not want to use particular choices.
 - Prefer clean object-oriented design and follow SOLID principles.
 - Use meaningful variable and function names to enhance code readability.

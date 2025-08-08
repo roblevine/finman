@@ -1,5 +1,4 @@
 using System;
-using FluentAssertions;
 using UserService.Domain.ValueObjects;
 using Xunit;
 
@@ -18,7 +17,7 @@ public class PersonNameTests
         var name = new PersonName(validName);
 
         // Assert
-        name.Value.Should().Be(validName);
+        Assert.Equal(validName, name.Value);
     }
 
     [Theory]
@@ -29,9 +28,8 @@ public class PersonNameTests
     public void Create_WithEmptyOrWhitespace_ShouldThrowArgumentException(string invalidName)
     {
         // Act & Assert
-        var action = () => new PersonName(invalidName);
-        action.Should().Throw<ArgumentException>()
-            .WithMessage("Name cannot be empty*");
+        var exception = Assert.Throws<ArgumentException>(() => new PersonName(invalidName));
+        Assert.StartsWith("Name cannot be empty", exception.Message);
     }
 
     [Fact]
@@ -41,9 +39,8 @@ public class PersonNameTests
         var tooLongName = new string('a', 51);
 
         // Act & Assert
-        var action = () => new PersonName(tooLongName);
-        action.Should().Throw<ArgumentException>()
-            .WithMessage("Name cannot exceed 50 characters*");
+        var exception = Assert.Throws<ArgumentException>(() => new PersonName(tooLongName));
+        Assert.StartsWith("Name cannot exceed 50 characters", exception.Message);
     }
 
     [Fact]
@@ -56,7 +53,7 @@ public class PersonNameTests
         var name = new PersonName(nameWithWhitespace);
 
         // Assert
-        name.Value.Should().Be("John");
+        Assert.Equal("John", name.Value);
     }
 
     [Fact]
@@ -69,6 +66,6 @@ public class PersonNameTests
         var name = new PersonName(maxLengthName);
 
         // Assert
-        name.Value.Should().Be(maxLengthName);
+        Assert.Equal(maxLengthName, name.Value);
     }
 }

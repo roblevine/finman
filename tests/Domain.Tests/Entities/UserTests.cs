@@ -1,5 +1,4 @@
 using System;
-using FluentAssertions;
 using UserService.Domain.Entities;
 using UserService.Domain.ValueObjects;
 using UserService.Domain.Exceptions;
@@ -22,19 +21,19 @@ public class UserTests
         var user = User.Create(_validEmail, _validUsername, _validFirstName, _validLastName, ValidPasswordHash);
 
         // Assert
-        user.Should().NotBeNull();
-        user.Id.Should().NotBeEmpty();
-        user.Email.Should().Be(_validEmail);
-        user.Username.Should().Be(_validUsername);
-        user.FirstName.Should().Be(_validFirstName);
-        user.LastName.Should().Be(_validLastName);
-        user.PasswordHash.Should().Be(ValidPasswordHash);
-        user.FullName.Should().Be("John Doe");
-        user.IsActive.Should().BeTrue();
-        user.IsDeleted.Should().BeFalse();
-        user.DeletedAt.Should().BeNull();
-        user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-        user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        Assert.NotNull(user);
+        Assert.NotEqual(Guid.Empty, user.Id);
+        Assert.Equal(_validEmail, user.Email);
+        Assert.Equal(_validUsername, user.Username);
+        Assert.Equal(_validFirstName, user.FirstName);
+        Assert.Equal(_validLastName, user.LastName);
+        Assert.Equal(ValidPasswordHash, user.PasswordHash);
+        Assert.Equal("John Doe", user.FullName);
+        Assert.True(user.IsActive);
+        Assert.False(user.IsDeleted);
+        Assert.Null(user.DeletedAt);
+        Assert.True(Math.Abs((DateTime.UtcNow - user.CreatedAt).TotalSeconds) < 1);
+        Assert.True(Math.Abs((DateTime.UtcNow - user.UpdatedAt).TotalSeconds) < 1);
     }
 
     [Theory]
@@ -44,9 +43,9 @@ public class UserTests
     public void Create_WithInvalidPasswordHash_ShouldThrowUserDomainException(string invalidPasswordHash)
     {
         // Act & Assert
-        var action = () => User.Create(_validEmail, _validUsername, _validFirstName, _validLastName, invalidPasswordHash);
-        action.Should().Throw<UserDomainException>()
-            .WithMessage("Password hash cannot be empty");
+        var exception = Assert.Throws<UserDomainException>(() => 
+            User.Create(_validEmail, _validUsername, _validFirstName, _validLastName, invalidPasswordHash));
+        Assert.Equal("Password hash cannot be empty", exception.Message);
     }
 
 }

@@ -3,7 +3,6 @@ using UserService.Domain.Entities;
 using UserService.Domain.Exceptions;
 using UserService.Tests.Application.Tests.Mocks;
 using Xunit;
-using FluentAssertions;
 
 namespace UserService.Tests.Application.Tests.UseCases;
 
@@ -34,16 +33,16 @@ public class RegisterUserTests
         var addedUser = await _mockRepo.AddAsync(user);
 
         // Assert
-        addedUser.Should().NotBeNull();
-        addedUser.Email.Should().Be(email);
-        addedUser.Username.Should().Be(username);
-        addedUser.FirstName.Should().Be(firstName);
-        addedUser.LastName.Should().Be(lastName);
-        addedUser.PasswordHash.Should().Be("hash:SecurePass123!");
+        Assert.NotNull(addedUser);
+        Assert.Equal(email, addedUser.Email);
+        Assert.Equal(username, addedUser.Username);
+        Assert.Equal(firstName, addedUser.FirstName);
+        Assert.Equal(lastName, addedUser.LastName);
+        Assert.Equal("hash:SecurePass123!", addedUser.PasswordHash);
         
         // Verify uniqueness checks would have passed
-        (await _mockRepo.IsEmailUniqueAsync(email)).Should().BeFalse(); // now taken
-        (await _mockRepo.IsUsernameUniqueAsync(username)).Should().BeFalse(); // now taken
+        Assert.False(await _mockRepo.IsEmailUniqueAsync(email)); // now taken
+        Assert.False(await _mockRepo.IsUsernameUniqueAsync(username)); // now taken
     }
 
     [Fact]
@@ -61,7 +60,7 @@ public class RegisterUserTests
 
         // Act & Assert
         var isUnique = await _mockRepo.IsEmailUniqueAsync(existingEmail);
-        isUnique.Should().BeFalse();
+        Assert.False(isUnique);
     }
 
     [Fact]
@@ -79,39 +78,35 @@ public class RegisterUserTests
 
         // Act & Assert
         var isUnique = await _mockRepo.IsUsernameUniqueAsync(existingUsername);
-        isUnique.Should().BeFalse();
+        Assert.False(isUnique);
     }
 
     [Fact]
     public void RegisterUser_WithInvalidEmail_ShouldThrowArgumentException()
     {
         // Arrange & Act & Assert
-        var act = () => new Email("invalid-email");
-        act.Should().Throw<ArgumentException>();
+        Assert.Throws<ArgumentException>(() => new Email("invalid-email"));
     }
 
     [Fact]
     public void RegisterUser_WithInvalidUsername_ShouldThrowArgumentException()
     {
         // Arrange & Act & Assert
-        var act = () => new Username("a"); // too short
-        act.Should().Throw<ArgumentException>();
+        Assert.Throws<ArgumentException>(() => new Username("a")); // too short
     }
 
     [Fact]
     public void RegisterUser_WithInvalidFirstName_ShouldThrowArgumentException()
     {
         // Arrange & Act & Assert
-        var act = () => new PersonName(""); // empty
-        act.Should().Throw<ArgumentException>();
+        Assert.Throws<ArgumentException>(() => new PersonName("")); // empty
     }
 
     [Fact]
     public void RegisterUser_WithInvalidLastName_ShouldThrowArgumentException()
     {
         // Arrange & Act & Assert
-        var act = () => new PersonName(" "); // whitespace only
-        act.Should().Throw<ArgumentException>();
+        Assert.Throws<ArgumentException>(() => new PersonName(" ")); // whitespace only
     }
 
     [Fact]
@@ -127,8 +122,8 @@ public class RegisterUserTests
         var exception = Assert.Throws<UserDomainException>(() => 
             User.Create(email, username, firstName, lastName, "")); // empty password hash
         
-        exception.Should().BeOfType<UserDomainException>()
-            .Which.Message.Should().Be("Password hash cannot be empty");
+        Assert.IsType<UserDomainException>(exception);
+        Assert.Equal("Password hash cannot be empty", exception.Message);
     }
 
     [Fact]
@@ -143,9 +138,9 @@ public class RegisterUserTests
         var cannotVerifyWrong = _mockHasher.VerifyPassword("WrongPassword", hashedPassword);
 
         // Assert
-        hashedPassword.Should().Be("hash:MySecretPassword123!");
-        canVerify.Should().BeTrue();
-        cannotVerifyWrong.Should().BeFalse();
+        Assert.Equal("hash:MySecretPassword123!", hashedPassword);
+        Assert.True(canVerify);
+        Assert.False(cannotVerifyWrong);
     }
 
     [Fact]
@@ -156,15 +151,15 @@ public class RegisterUserTests
         var username = new Username("testuser");
 
         // Initially unique
-        (await _mockRepo.IsEmailUniqueAsync(email)).Should().BeTrue();
-        (await _mockRepo.IsUsernameUniqueAsync(username)).Should().BeTrue();
+        Assert.True(await _mockRepo.IsEmailUniqueAsync(email));
+        Assert.True(await _mockRepo.IsUsernameUniqueAsync(username));
 
         // Force non-unique
         _mockRepo.ForceEmailNotUnique = true;
         _mockRepo.ForceUsernameNotUnique = true;
 
         // Act & Assert
-        (await _mockRepo.IsEmailUniqueAsync(email)).Should().BeFalse();
-        (await _mockRepo.IsUsernameUniqueAsync(username)).Should().BeFalse();
+        Assert.False(await _mockRepo.IsEmailUniqueAsync(email));
+        Assert.False(await _mockRepo.IsUsernameUniqueAsync(username));
     }
 }

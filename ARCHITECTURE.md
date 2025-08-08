@@ -55,3 +55,9 @@ Each microservice follows the Hexagonal Architecture pattern to ensure:
 - **Domain (Core)**: Contains business entities, domain services, and business rules
 - **Ports**: Define contracts/interfaces between layers
 - **Adapters**: Implement ports to connect to external systems (databases, APIs, web controllers)
+
+## Libraries and frameworks
+
+### DO NOT USE
+The follwing libraries should not be considered as part of this solution
+- FLuent Assertions

@@ -1,5 +1,4 @@
 using System;
-using FluentAssertions;
 using UserService.Domain.ValueObjects;
 using Xunit;
 
@@ -19,7 +18,7 @@ public class UsernameTests
         var username = new Username(validUsername);
 
         // Assert
-        username.Value.Should().Be(validUsername.ToLowerInvariant());
+        Assert.Equal(validUsername.ToLowerInvariant(), username.Value);
     }
 
     [Fact]
@@ -32,7 +31,7 @@ public class UsernameTests
         var username = new Username(validUsername);
 
         // Assert
-        username.Value.Should().Be("user123");
+        Assert.Equal("user123", username.Value);
     }
 
     [Theory]
@@ -43,9 +42,8 @@ public class UsernameTests
     public void Create_WithEmptyOrWhitespace_ShouldThrowArgumentException(string invalidUsername)
     {
         // Act & Assert
-        var action = () => new Username(invalidUsername);
-        action.Should().Throw<ArgumentException>()
-            .WithMessage("Username cannot be empty*");
+        var exception = Assert.Throws<ArgumentException>(() => new Username(invalidUsername));
+        Assert.StartsWith("Username cannot be empty", exception.Message);
     }
 
     [Theory]
@@ -59,9 +57,8 @@ public class UsernameTests
     public void Create_WithInvalidFormat_ShouldThrowArgumentException(string invalidUsername)
     {
         // Act & Assert
-        var action = () => new Username(invalidUsername);
-        action.Should().Throw<ArgumentException>()
-            .WithMessage("Username must be 3-20 characters, alphanumeric and underscore only*");
+        var exception = Assert.Throws<ArgumentException>(() => new Username(invalidUsername));
+        Assert.StartsWith("Username must be 3-20 characters, alphanumeric and underscore only", exception.Message);
     }
 
     [Fact]
@@ -74,7 +71,7 @@ public class UsernameTests
         var username = new Username(usernameWithWhitespace);
 
         // Assert
-        username.Value.Should().Be("username");
+        Assert.Equal("username", username.Value);
     }
 
     [Fact]
@@ -87,6 +84,6 @@ public class UsernameTests
         string result = username;
 
         // Assert
-        result.Should().Be("testuser");
+        Assert.Equal("testuser", result);
     }
 }
