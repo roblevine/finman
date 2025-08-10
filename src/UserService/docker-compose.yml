@@ -10,6 +10,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      # Database (optional for now; used in later phases)
+      - POSTGRES_CONNECTION=Host=postgres;Port=5432;Database=${POSTGRES_DB:-finman};Username=${POSTGRES_USER:-finman};Password=${POSTGRES_PASSWORD:-finman}
+      - MIGRATE_AT_STARTUP=false
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -19,7 +22,32 @@ services:
     restart: unless-stopped
     networks:
       - finman-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-finman}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-finman}
+      - POSTGRES_DB=${POSTGRES_DB:-finman}
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - finman-network
 
 networks:
   finman-network:
     driver: bridge
+
+volumes:
+  pgdata:
