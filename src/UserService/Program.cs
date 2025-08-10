@@ -29,6 +29,11 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Service is running"));
 
+// Register application services
+builder.Services.AddScoped<UserService.Application.Ports.IUserRepository, UserService.Infrastructure.Repositories.InMemoryUserRepository>();
+builder.Services.AddScoped<UserService.Application.Ports.IPasswordHasher, UserService.Infrastructure.Security.BCryptPasswordHasher>();
+builder.Services.AddScoped<UserService.Application.UseCases.RegisterUserHandler>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

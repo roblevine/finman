@@ -135,9 +135,10 @@ Location: /api/users/{id}
   - [x] Secure hash generation and verification
   - [x] Comprehensive error handling for edge cases
   - [x] 12/12 tests passing covering all scenarios
-- [ ] **T012:** Dependency injection setup
-  - [ ] Service registration in Program.cs
-  - [ ] Configuration for development/test environments
+- [x] **T012:** Dependency injection setup
+  - [x] Service registration in Program.cs (IUserRepository, IPasswordHasher, RegisterUserHandler)
+  - [x] Configuration for development/test environments with proper scoped lifetimes
+  - [x] 6/6 comprehensive DI tests validating service resolution and scoping
 
 ### Phase 5: API Layer 🚧
 - [ ] **T013:** AuthController implementation
