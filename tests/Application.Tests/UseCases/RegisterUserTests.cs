@@ -1,5 +1,6 @@
 using UserService.Application.DTOs;
 using UserService.Application.UseCases;
+using UserService.Application.Exceptions;
 using UserService.Domain.ValueObjects;
 using UserService.Domain.Entities;
 using UserService.Domain.Exceptions;
@@ -72,7 +73,7 @@ public class RegisterUserTests
         };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.ExecuteAsync(request));
+        var exception = await Assert.ThrowsAsync<UniquenessViolationException>(() => _handler.ExecuteAsync(request));
         Assert.Contains("Email 'existing@example.com' is already registered", exception.Message);
     }
 
@@ -98,7 +99,7 @@ public class RegisterUserTests
         };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.ExecuteAsync(request));
+        var exception = await Assert.ThrowsAsync<UniquenessViolationException>(() => _handler.ExecuteAsync(request));
         Assert.Contains("Username 'existinguser' is already taken", exception.Message);
     }
 
@@ -248,7 +249,7 @@ public class RegisterUserTests
         };
 
         // Act & Assert - Should fail due to forced conflicts
-        var emailException = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.ExecuteAsync(anotherRequest));
+        var emailException = await Assert.ThrowsAsync<UniquenessViolationException>(() => _handler.ExecuteAsync(anotherRequest));
         Assert.Contains("Email 'different@example.com' is already registered", emailException.Message);
     }
 }

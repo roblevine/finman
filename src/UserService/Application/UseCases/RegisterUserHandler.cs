@@ -1,5 +1,6 @@
 using UserService.Application.DTOs;
 using UserService.Application.Ports;
+using UserService.Application.Exceptions;
 using UserService.Domain.Entities;
 using UserService.Domain.ValueObjects;
 using UserService.Domain.Exceptions;
@@ -31,13 +32,13 @@ public class RegisterUserHandler
         var isEmailUnique = await _userRepository.IsEmailUniqueAsync(email);
         if (!isEmailUnique)
         {
-            throw new InvalidOperationException($"Email '{email.Value}' is already registered");
+            throw new UniquenessViolationException($"Email '{email.Value}' is already registered");
         }
 
         var isUsernameUnique = await _userRepository.IsUsernameUniqueAsync(username);
         if (!isUsernameUnique)
         {
-            throw new InvalidOperationException($"Username '{username.Value}' is already taken");
+            throw new UniquenessViolationException($"Username '{username.Value}' is already taken");
         }
 
         // Hash password
