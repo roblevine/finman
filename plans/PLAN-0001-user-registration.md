@@ -125,13 +125,16 @@ Location: /api/users/{id}
   - [x] Verify error scenarios work correctly
 
 ### Phase 4: Infrastructure Layer 🚧
-- [ ] **T010:** In-memory repository implementation
-  - [ ] InMemoryUserRepository class
-  - [ ] Thread-safe operations
-  - [ ] Uniqueness constraint enforcement
-- [ ] **T011:** Password hashing service
-  - [ ] BCrypt implementation
-  - [ ] Secure hash generation and verification
+- [x] **T010:** In-memory repository implementation
+  - [x] InMemoryUserRepository class
+  - [x] Thread-safe operations using ConcurrentDictionary with proper locking
+  - [x] Uniqueness constraint enforcement
+  - [x] 10/10 tests passing with comprehensive thread safety validation
+- [x] **T011:** Password hashing service
+  - [x] BCrypt.Net-Next v4.0.3 implementation with work factor 12
+  - [x] Secure hash generation and verification
+  - [x] Comprehensive error handling for edge cases
+  - [x] 12/12 tests passing covering all scenarios
 - [ ] **T012:** Dependency injection setup
   - [ ] Service registration in Program.cs
   - [ ] Configuration for development/test environments
@@ -292,22 +295,6 @@ src/UserService/Application/
 - Infrastructure: 22/22 tests ✅  
 - Application: 10/10 tests ✅
 - **Total: 80/80 tests passing**
-
-### Next Session Priorities (Phase 4)
-1. **T010:** InMemoryUserRepository implementation
-   - Thread-safe operations using ConcurrentDictionary
-   - Proper uniqueness constraint enforcement
-   - Integration with existing domain entities
-
-2. **T011:** BCrypt password hashing service
-   - Add BCrypt.Net-Next NuGet package
-   - Implement IPasswordHasher with secure hash generation
-   - Replace mock hasher in integration scenarios
-
-3. **T012:** Dependency injection configuration
-   - Register services in Program.cs
-   - Configure for Development/Test environments
-   - Ensure proper service lifetimes
 
 The foundation is solid with comprehensive test coverage ensuring we can confidently build the infrastructure layer.
 
