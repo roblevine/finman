@@ -4,10 +4,10 @@ WORKDIR /src
 
 # Copy everything and restore
 COPY . .
-RUN dotnet restore FinmanUserService.sln
+RUN dotnet restore UserService.sln
 
 # Build and test
-RUN dotnet build FinmanUserService.sln -c Release --no-restore
+RUN dotnet build UserService.sln -c Release --no-restore
 RUN dotnet test --no-build --configuration Release --verbosity normal
 
 # Publish the application

@@ -3,14 +3,6 @@
 		{
 			"name": "Finman (Root)",
 			"path": "."
-		},
-		{
-			"name": "UserService",
-			"path": "./services/user-service"
-		},
-		{
-			"name": "Shared Libraries",
-			"path": "./services/shared"
 		}
 	],
 	"settings": {

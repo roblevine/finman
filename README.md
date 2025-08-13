@@ -14,10 +14,11 @@ This is a **monorepo** structured for microservices development:
 finman/
 ├── services/
 │   ├── user-service/              # User authentication & management
-│   └── shared/                    # Shared libraries (domain, infrastructure, testing)
+│   ├── shared/                    # Shared libraries (domain, infrastructure, testing)
+│   └── template-service/          # Template for creating new services
 ├── frontend/                      # Next.js SPA (future)
 ├── infrastructure/                # Docker compose, deployment configs
-├── scripts/                       # Root-level build/test/run scripts
+├── scripts/                       # Root-level build/test/run scripts (working)
 ├── docs/                         # Architecture and design documentation
 └── plans/                        # Implementation plans and ADRs
 ```
@@ -47,14 +48,27 @@ cd services/user-service
 ./scripts/run.sh --local   # Run locally (http://localhost:5001)
 ```
 
-### Monorepo Scripts (Future)
+### Monorepo Scripts
 
-Root-level scripts will orchestrate multiple services:
+Root-level scripts orchestrate multiple services:
 
 ```bash
-./scripts/test.sh      # Test all services
-./scripts/build.sh     # Build all services  
-./scripts/run.sh       # Run full stack locally
+./scripts/test.sh      # Test all services and shared libraries
+./scripts/build.sh     # Build all services and shared libraries
+./scripts/run.sh       # Run services (with orchestration options)
+./scripts/setup.sh     # Setup entire monorepo
+./scripts/clean.sh     # Clean all build artifacts
+```
+
+### Service Templates
+
+Create new services using the template:
+
+```bash
+# Use services/template-service/ as a starting point
+# Follow the README.md in template-service for guidance
+cp -r services/template-service services/my-new-service
+# Edit and customize the new service
 ```
 
 ## Service Architecture

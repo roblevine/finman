@@ -34,9 +34,8 @@ if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
     # Build UserService image if Dockerfile exists
     if [ -f "services/user-service/src/UserService/Dockerfile" ]; then
         echo "📁 Building UserService Docker image..."
-        cd services/user-service
-        docker build -f src/UserService/Dockerfile -t finman-userservice:latest --load .
-        cd ../..
+        # Build from service root with proper context
+        docker build -f services/user-service/src/UserService/Dockerfile -t finman-userservice:latest --load services/user-service
         echo "✅ Docker image 'finman-userservice:latest' built successfully!"
     else
         echo "⚠️  UserService Dockerfile not found"
