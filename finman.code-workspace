@@ -1,8 +1,25 @@
 {
 	"folders": [
 		{
+			"name": "Finman (Root)",
 			"path": "."
+		},
+		{
+			"name": "UserService",
+			"path": "./services/user-service"
+		},
+		{
+			"name": "Shared Libraries",
+			"path": "./services/shared"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"dotnet.defaultSolution": "./services/user-service/UserService.sln"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-dotnettools.csharp",
+			"ms-dotnettools.csdevkit"
+		]
+	}
 }

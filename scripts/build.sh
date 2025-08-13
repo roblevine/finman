@@ -1,39 +1,46 @@
 #!/bin/bash
 set -e
 
-echo "🏗️  Building Finman User Service..."
+echo "🔨 Building Finman Monorepo..."
 
 # Navigate to repo root directory
 cd "$(dirname "$0")/.."
 
-echo "📦 Restoring .NET packages..."
-dotnet restore
+# Build shared libraries first
+echo "📦 Building shared libraries..."
+if [ -f "services/shared/Finman.Shared.sln" ]; then
+    echo "🔧 Building shared solution..."
+    dotnet build services/shared/Finman.Shared.sln --configuration Release
+else
+    echo "ℹ️  No shared libraries to build yet"
+fi
 
-echo "🔧 Building the solution..."
-dotnet build --no-restore --configuration Release
+# Build all services
+echo "🏗️  Building services..."
 
-echo "🧪 Running tests..."
-dotnet test --no-build --configuration Release --verbosity normal
+# Build UserService
+echo "📦 Building UserService..."
+cd services/user-service
+dotnet build --configuration Release
+cd ../..
 
-echo "✅ Build completed successfully!"
+echo "✅ Monorepo build completed successfully!"
 echo ""
 
-# Check if Docker is available and build image if possible
+# Check if Docker is available and build images
 if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
-    echo "🐳 Building Docker image..."
+    echo "🐳 Building Docker images..."
     
-    # Check if Dockerfile exists
-    if [ -f "src/UserService/Dockerfile" ]; then
-        # Build from repo root with UserService Dockerfile and load to local Docker
-        echo "📁 Building Docker image from repository root..."
+    # Build UserService image if Dockerfile exists
+    if [ -f "services/user-service/src/UserService/Dockerfile" ]; then
+        echo "📁 Building UserService Docker image..."
+        cd services/user-service
         docker build -f src/UserService/Dockerfile -t finman-userservice:latest --load .
+        cd ../..
         echo "✅ Docker image 'finman-userservice:latest' built successfully!"
-        echo "🚀 Run './scripts/run.sh --docker' to start the containerized service."
     else
-        echo "⚠️  Dockerfile not found in src/UserService/"
-        echo "🏠 Run './scripts/run.sh --local' to start the service locally."
+        echo "⚠️  UserService Dockerfile not found"
     fi
 else
     echo "🚫 Docker not available in this environment."
-    echo "🏠 Run './scripts/run.sh --local' to start the service locally."
 fi

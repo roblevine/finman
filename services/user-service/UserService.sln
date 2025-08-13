@@ -2,15 +2,15 @@
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "src\UserService\UserService.csproj", "{916D6201-2C9A-4F38-818A-27CB4119784A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "src/UserService/UserService.csproj", "{916D6201-2C9A-4F38-818A-27CB4119784A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Tests", "tests\Infrastructure.Tests\Infrastructure.Tests.csproj", "{72891897-F573-4AF1-AEE6-C089B3DB0403}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Tests", "tests/Infrastructure.Tests/Infrastructure.Tests.csproj", "{72891897-F573-4AF1-AEE6-C089B3DB0403}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{06D2BC82-6A64-4F0D-8868-38705664932C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Tests", "tests\Domain.Tests\Domain.Tests.csproj", "{9AADE8F3-1EBF-4387-8A6A-BF726DD4FE00}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Tests", "tests/Domain.Tests/Domain.Tests.csproj", "{9AADE8F3-1EBF-4387-8A6A-BF726DD4FE00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.Tests", "tests\Application.Tests\Application.Tests.csproj", "{1E4B3E0C-6AE5-4E81-8CF6-70F23E5303F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.Tests", "tests/Application.Tests/Application.Tests.csproj", "{1E4B3E0C-6AE5-4E81-8CF6-70F23E5303F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

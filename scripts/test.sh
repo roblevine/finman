@@ -1,16 +1,28 @@
 #!/bin/bash
 set -e
 
-echo "🧪 Running all tests for Finman User Service..."
+echo "🧪 Running all tests for Finman Monorepo..."
 
 # Navigate to repo root directory
 cd "$(dirname "$0")/.."
 
-echo "📋 Building and running tests..."
-dotnet test --verbosity normal --logger "console;verbosity=detailed"
+# Test shared libraries first
+echo "� Testing shared libraries..."
+if [ -f "services/shared/Finman.Shared.sln" ]; then
+    echo "🔬 Running shared library tests..."
+    dotnet test services/shared/Finman.Shared.sln --verbosity normal
+else
+    echo "ℹ️  No shared library tests to run yet"
+fi
 
-echo "📊 Generating test coverage report..."
-dotnet test --collect:"XPlat Code Coverage" --results-directory ./TestResults
+# Test all services
+echo "🏗️  Testing services..."
 
-echo "✅ All tests completed successfully!"
+# Test UserService
+echo "📦 Testing UserService..."
+cd services/user-service
+./scripts/test.sh
+cd ../..
+
+echo "✅ All monorepo tests completed successfully!"
 echo "🎉 All tests passed!"
