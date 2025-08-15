@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -41,29 +40,12 @@ builder.Services.AddSwaggerGen(c =>
     }
 });
 
-// Add health checks (we'll add Npgsql later conditionally)
+// Add health checks
 var healthChecksBuilder = builder.Services.AddHealthChecks()
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Service is running"));
 
-// Persistence configuration
-var connectionString = builder.Configuration.GetValue<string>("POSTGRES_CONNECTION")
-                      ?? builder.Configuration.GetConnectionString("Postgres")
-                      ?? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION");
-
-if (!string.IsNullOrWhiteSpace(connectionString))
-{
-    // EF Core with Npgsql
-    builder.Services.AddDbContext<UserService.Infrastructure.Persistence.FinmanDbContext>(options =>
-        options.UseNpgsql(connectionString));
-
-    // Use EF repository
-    builder.Services.AddScoped<UserService.Application.Ports.IUserRepository, UserService.Infrastructure.Repositories.EfUserRepository>();
-}
-else
-{
-    // Fallback to in-memory repository for non-DB scenarios
-    builder.Services.AddScoped<UserService.Application.Ports.IUserRepository, UserService.Infrastructure.Repositories.InMemoryUserRepository>();
-}
+// Repository and service registration - using in-memory implementation
+builder.Services.AddScoped<UserService.Application.Ports.IUserRepository, UserService.Infrastructure.Repositories.InMemoryUserRepository>();
 builder.Services.AddScoped<UserService.Application.Ports.IPasswordHasher, UserService.Infrastructure.Security.BCryptPasswordHasher>();
 builder.Services.AddScoped<UserService.Application.UseCases.RegisterUserHandler>();
 
@@ -76,24 +58,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
-
-// Auto-migration hook (Development only)
-var migrateAtStartup = app.Configuration.GetValue<bool>("MIGRATE_AT_STARTUP")
-                      || app.Configuration.GetValue<bool>("MigrateAtStartup");
-if (app.Environment.IsDevelopment() && migrateAtStartup && !string.IsNullOrWhiteSpace(connectionString))
-{
-    try
-    {
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<UserService.Infrastructure.Persistence.FinmanDbContext>();
-        db.Database.Migrate();
-        app.Logger.LogInformation("EF Core migrations applied at startup.");
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "Failed to apply EF Core migrations at startup.");
-    }
 }
 
 // Only use HTTPS redirection in production

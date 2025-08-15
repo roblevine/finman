@@ -1,7 +1,8 @@
 # Plan: PostgreSQL persistence and Testcontainers
 
-**Status:** PENDING  
-**Started:** 2025-08-10
+**Status:** IN PROGRESS  
+**Started:** 2025-08-10  
+**Resumed:** 2025-08-15
 
 ## Overview
 Introduce durable persistence using PostgreSQL while preserving the existing Hexagonal (Ports & Adapters) architecture. We will use EF Core with Npgsql for data access and code-first migrations, and DotNet.Testcontainers to run real PostgreSQL instances during integration tests. Scope includes schema/modeling for Users, repository ports and adapters, DI wiring, local dev experience (Docker), and a minimal migration workflow. Out of scope: full auth flows or advanced aggregates beyond Users.
@@ -48,85 +49,93 @@ Out of scope (for this phase):
 ## Implementation Steps
 
 ### Phase 0 – Baseline and guardrails
-- Verify current solution builds and tests pass (scripts/test.sh)
-- Add a feature flag for guarded auto-migration in Development (MIGRATE_AT_STARTUP=true)
+- [✅] **CLEANUP COMPLETED**: Reverted all partial EF Core work to achieve clean in-memory baseline
+  - Removed all EF Core packages from UserService.csproj  
+  - Removed Infrastructure/Persistence/ directory and EfUserRepository.cs
+  - Cleaned Program.cs to use only InMemoryUserRepository
+  - Fixed appsettings.Development.json with minimal config
+  - **RESULT**: All 125 tests passing with clean in-memory implementation
+- [ ] Add a feature flag for guarded auto-migration in Development (MIGRATE_AT_STARTUP=true)
 
 ### Phase 1 – Dependencies and local Postgres
-- Add NuGet dependencies to UserService:
-  - Npgsql.EntityFrameworkCore.PostgreSQL
-  - Microsoft.EntityFrameworkCore.Design
-  - (optional) Microsoft.Extensions.Diagnostics.HealthChecks.NpgSql for DB health check
-- Add Test dependencies to tests projects:
-  - DotNet.Testcontainers
-- Extend `src/UserService/docker-compose.yml` with a `postgres` service (postgres:16-alpine), volume, healthcheck, and port mapping; define default env (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
-- Update `scripts/setup.sh` to optionally start Postgres via compose and export a `POSTGRES_CONNECTION` suitable for local runs
+- [ ] Add NuGet dependencies to UserService:
+  - [ ] Npgsql.EntityFrameworkCore.PostgreSQL
+  - [ ] Microsoft.EntityFrameworkCore.Design
+  - [ ] Microsoft.Extensions.Diagnostics.HealthChecks.NpgSql for DB health check
+- [ ] Add Test dependencies to tests projects:
+  - [ ] DotNet.Testcontainers
+- [ ] Extend `src/UserService/docker-compose.yml` with a `postgres` service (postgres:16-alpine), volume, healthcheck, and port mapping; define default env (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
+- [ ] Update `scripts/setup.sh` to optionally start Postgres via compose and export a `POSTGRES_CONNECTION` suitable for local runs
 
 ### Phase 2 – Application ports
-- Define `Application/Ports/IUserRepository` with:
-  - Task<bool> ExistsByEmail(string email)
-  - Task<bool> ExistsByUsername(string username)
-  - Task Add(User user)
-  - Task<User?> GetById(Guid id)
-  - Task<User?> FindByEmail(string email)
-- If not already present, ensure a minimal `User` entity in Domain supports these needs (id/email/username/first/last/password-hash/timestamps)
+- [ ] Define `Application/Ports/IUserRepository` with:
+  - [ ] Task<bool> ExistsByEmail(Email email)
+  - [ ] Task<bool> ExistsByUsername(Username username)
+  - [ ] Task Add(User user)
+  - [ ] Task<User?> GetById(Guid id)
+  - [ ] Task<User?> FindByEmail(Email email)
+- [ ] Verify `User` entity in Domain supports these needs (already exists with value objects)
 
 ### Phase 3 – Infrastructure persistence
-- Create `Infrastructure/Persistence/FinmanDbContext` with a Users DbSet
-- Add `Infrastructure/Persistence/Configurations/UserConfiguration` with Fluent API:
-  - Primary key, property lengths
-  - Enable citext via migration SQL; map columns to `citext` where applicable or enforce LOWER(...) unique index
-  - Unique indexes on email and username
-  - Timestamps with default now() and on update trigger if desired (or set via app)
-- Create initial migration `20250810_0001_Users`:
-  - Execute `CREATE EXTENSION IF NOT EXISTS citext;`
-  - Create table `users` with:
-    - id UUID (PK)
-    - email CITEXT UNIQUE
-    - username CITEXT UNIQUE
-    - first_name TEXT, last_name TEXT
-    - password_hash BYTEA (or TEXT if using encoded) and optional password_salt
-    - created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ
+- [ ] Create `Infrastructure/Persistence/FinmanDbContext` with a Users DbSet
+- [ ] Add `Infrastructure/Persistence/Configurations/UserConfiguration` with Fluent API:
+  - [ ] Primary key, property lengths
+  - [ ] **Value object conversions**: Email, Username, PersonName (FirstName/LastName) stored as strings
+  - [ ] Enable citext via migration SQL; map Email/Username columns to `citext` 
+  - [ ] Unique indexes on email and username
+  - [ ] Timestamps with UTC handling
+- [ ] Create initial migration `20250815_0001_Users`:
+  - [ ] Execute `CREATE EXTENSION IF NOT EXISTS citext;`
+  - [ ] Create table `users` with:
+    - [ ] id UUID (PK)
+    - [ ] email CITEXT UNIQUE
+    - [ ] username CITEXT UNIQUE
+    - [ ] first_name TEXT, last_name TEXT
+    - [ ] password_hash TEXT
+    - [ ] created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ
+    - [ ] is_active BOOLEAN, is_deleted BOOLEAN, deleted_at TIMESTAMPTZ
 
 ### Phase 4 – DI wiring and health
-- In `Program.cs`:
-  - Register DbContext with UseNpgsql(POSTGRES_CONNECTION)
-  - Add health checks: `.AddNpgSql(POSTGRES_CONNECTION)` alongside existing self check
-  - On startup in Development and when `MIGRATE_AT_STARTUP=true`, run `db.Database.Migrate()`
-- Register repository adapter: `IUserRepository` -> `EfUserRepository`
+- [ ] In `Program.cs`:
+  - [ ] Register DbContext with UseNpgsql(POSTGRES_CONNECTION)
+  - [ ] Add health checks: `.AddNpgSql(POSTGRES_CONNECTION)` alongside existing self check
+  - [ ] On startup in Development and when `MIGRATE_AT_STARTUP=true`, run `db.Database.Migrate()`
+- [ ] Register repository adapter: `IUserRepository` -> `EfUserRepository`
 
 ### Phase 5 – Repository adapter
-- Implement `Infrastructure/Persistence/Repositories/EfUserRepository` with the port methods
-- Map `DbUpdateException` (unique violations) to domain-specific errors where needed
+- [ ] Implement `Infrastructure/Persistence/Repositories/EfUserRepository` with the port methods
+- [ ] Handle value object conversions properly (EF will use the configured conversions)
+- [ ] Map `DbUpdateException` (unique violations) to domain-specific errors where needed
 
 ### Phase 6 – Integration tests (Testcontainers)
-- Add a shared xUnit fixture implementing `IAsyncLifetime` that:
-  - Spins up a Postgres 16-alpine container with random host port
-  - Exposes a connection string
-  - Applies EF Core migrations before tests run
-- For web integration tests using `TestWebApplicationFactory`, override configuration to inject the container connection string
-- Tests to add:
-  - Migration smoke test: Db schema exists, unique indexes present
-  - Repository tests:
-    - Add user (happy path)
-    - Duplicate email rejected (unique constraint)
-    - Duplicate username rejected (unique constraint)
-    - FindByEmail returns expected user
+- [ ] Add a shared xUnit fixture implementing `IAsyncLifetime` that:
+  - [ ] Spins up a Postgres 16-alpine container with random host port
+  - [ ] Exposes a connection string
+  - [ ] Applies EF Core migrations before tests run
+- [ ] For web integration tests using `TestWebApplicationFactory`, override configuration to inject the container connection string
+- [ ] Tests to add:
+  - [ ] Migration smoke test: Db schema exists, unique indexes present
+  - [ ] Repository tests:
+    - [ ] Add user (happy path) with value objects
+    - [ ] Duplicate email rejected (unique constraint)
+    - [ ] Duplicate username rejected (unique constraint)
+    - [ ] FindByEmail returns expected user with proper value object reconstruction
 
 ### Phase 7 – Use case persistence wiring
-- Update the registration use case to call `IUserRepository` for exists-checks and persistence
-- Map infrastructure exceptions to application DTO errors for duplicate email/username
-- Add end-to-end test via WebApplicationFactory hitting the registration endpoint (if already present), using Testcontainers DB
+- [ ] Update the registration use case to call `IUserRepository` for exists-checks and persistence
+- [ ] Map infrastructure exceptions to application DTO errors for duplicate email/username
+- [ ] Add end-to-end test via WebApplicationFactory hitting the registration endpoint, using Testcontainers DB
 
 ### Phase 8 – Dev UX and docs
-- Update README and scripts docs:
-  - How to start local Postgres (compose)
-  - How to run migrations and enable auto-migrate in Development
-  - Environment variables (POSTGRES_CONNECTION, MIGRATE_AT_STARTUP)
-- Provide `.env.example` with sensible defaults
+- [ ] Update README and scripts docs:
+  - [ ] How to start local Postgres (compose)
+  - [ ] How to run migrations and enable auto-migrate in Development
+  - [ ] Environment variables (POSTGRES_CONNECTION, MIGRATE_AT_STARTUP)
+- [ ] Provide `.env.example` with sensible defaults
 
 ### Phase 9 – Optional CI wiring (deferred if no CI yet)
-- Ensure CI runner has Docker available
-- Run tests; Testcontainers will pull and run postgres automatically
+- [ ] Ensure CI runner has Docker available
+- [ ] Run tests; Testcontainers will pull and run postgres automatically
 
 ## Success Criteria and Tests
 Success criteria:
@@ -142,8 +151,13 @@ Tests to implement:
 - Health check: DB health check returns unhealthy when pointing to non-existent DB (non-flaky threshold)
 
 ## Working Area Scratchpad
-- Decide on `password_hash` storage format: BYTEA (preferred) vs TEXT base64; adapt EF mapping accordingly
-- Consider mapping `email`/`username` as `citext` vs `text` + functional unique index on LOWER(column); prioritize `citext` for simplicity
-- Consider `created_at`/`updated_at` source of truth: database default vs application-set timestamps
-- Potential follow-up: optimistic concurrency via xmin, soft-deletes, and audit fields
+- **Value Object Handling**: Use EF Core value conversions for Email, Username, PersonName:
+  - Email/Username: Store as CITEXT, convert to/from value objects automatically
+  - PersonName (FirstName/LastName): Store as TEXT, convert to/from value objects
+  - All value objects have implicit string operators which will help with EF mapping
+- Decide on `password_hash` storage format: TEXT (since we're using BCrypt strings) 
+- Use `citext` extension for case-insensitive email/username (already normalized in value objects)
+- `created_at`/`updated_at`: Use application-set timestamps (already in User entity)
+- User entity has private constructor + static factory method - EF Core will handle this correctly
+- Potential follow-up: optimistic concurrency via xmin, soft-deletes (already supported via IsDeleted), and audit fields
 - Potential follow-up: paginated queries on users with index on created_at
