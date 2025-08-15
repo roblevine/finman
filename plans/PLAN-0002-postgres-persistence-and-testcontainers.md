@@ -58,14 +58,14 @@ Out of scope (for this phase):
 - [ ] Add a feature flag for guarded auto-migration in Development (MIGRATE_AT_STARTUP=true)
 
 ### Phase 1 – Dependencies and local Postgres
-- [ ] Add NuGet dependencies to UserService:
-  - [ ] Npgsql.EntityFrameworkCore.PostgreSQL
-  - [ ] Microsoft.EntityFrameworkCore.Design
-  - [ ] Microsoft.Extensions.Diagnostics.HealthChecks.NpgSql for DB health check
-- [ ] Add Test dependencies to tests projects:
-  - [ ] DotNet.Testcontainers
-- [ ] Extend `src/UserService/docker-compose.yml` with a `postgres` service (postgres:16-alpine), volume, healthcheck, and port mapping; define default env (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
-- [ ] Update `scripts/setup.sh` to optionally start Postgres via compose and export a `POSTGRES_CONNECTION` suitable for local runs
+- [✅] Add NuGet dependencies to UserService:
+  - [✅] Npgsql.EntityFrameworkCore.PostgreSQL (9.0.4)
+  - [✅] Microsoft.EntityFrameworkCore.Design (9.0.8) 
+  - [✅] AspNetCore.HealthChecks.NpgSql (9.0.0) for DB health check
+- [✅] Add Test dependencies to tests projects:
+  - [✅] DotNet.Testcontainers (1.6.0)
+- [✅] Extend `src/UserService/docker-compose.yml` with a `postgres` service (postgres:16-alpine), volume, healthcheck, and port mapping; define default env (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
+- [✅] Update `scripts/setup.sh` to optionally start Postgres via compose and export a `POSTGRES_CONNECTION` suitable for local runs
 
 ### Phase 2 – Application ports
 - [ ] Define `Application/Ports/IUserRepository` with:
@@ -80,7 +80,10 @@ Out of scope (for this phase):
 - [ ] Create `Infrastructure/Persistence/FinmanDbContext` with a Users DbSet
 - [ ] Add `Infrastructure/Persistence/Configurations/UserConfiguration` with Fluent API:
   - [ ] Primary key, property lengths
-  - [ ] **Value object conversions**: Email, Username, PersonName (FirstName/LastName) stored as strings
+  - [ ] **Value object conversions using OwnsOne pattern**:
+    - [ ] `Email`: Store as CITEXT, use `HasConversion<string>()` with Email's implicit operators
+    - [ ] `Username`: Store as CITEXT, use `HasConversion<string>()` with Username's implicit operators  
+    - [ ] `PersonName`: Use `OwnsOne()` to map FirstName/LastName as separate TEXT columns
   - [ ] Enable citext via migration SQL; map Email/Username columns to `citext` 
   - [ ] Unique indexes on email and username
   - [ ] Timestamps with UTC handling
@@ -151,13 +154,19 @@ Tests to implement:
 - Health check: DB health check returns unhealthy when pointing to non-existent DB (non-flaky threshold)
 
 ## Working Area Scratchpad
-- **Value Object Handling**: Use EF Core value conversions for Email, Username, PersonName:
-  - Email/Username: Store as CITEXT, convert to/from value objects automatically
-  - PersonName (FirstName/LastName): Store as TEXT, convert to/from value objects
-  - All value objects have implicit string operators which will help with EF mapping
-- Decide on `password_hash` storage format: TEXT (since we're using BCrypt strings) 
-- Use `citext` extension for case-insensitive email/username (already normalized in value objects)
-- `created_at`/`updated_at`: Use application-set timestamps (already in User entity)
-- User entity has private constructor + static factory method - EF Core will handle this correctly
-- Potential follow-up: optimistic concurrency via xmin, soft-deletes (already supported via IsDeleted), and audit fields
-- Potential follow-up: paginated queries on users with index on created_at
+- **Value Object Handling**: Critical EF Core mapping strategy for our rich domain objects:
+  - **Email value object**: Use `HasConversion<string>()` to leverage Email's implicit string conversion operators
+    - Database: Store as CITEXT for case-insensitive uniqueness
+    - EF mapping: `Email email` property ↔ `string` column using implicit operators
+  - **Username value object**: Use `HasConversion<string>()` to leverage Username's implicit string conversion operators
+    - Database: Store as CITEXT for case-insensitive uniqueness  
+    - EF mapping: `Username username` property ↔ `string` column using implicit operators
+  - **PersonName value object**: Use `OwnsOne()` pattern for complex value object
+    - Database: Store as separate `first_name` and `last_name` TEXT columns
+    - EF mapping: `PersonName name` property ↔ `{ FirstName, LastName }` columns
+    - Configuration: `entity.OwnsOne(u => u.Name, name => { name.Property(n => n.FirstName).HasColumnName("first_name"); name.Property(n => n.LastName).HasColumnName("last_name"); });`
+- **Password Hash**: Store as TEXT (BCrypt produces string hashes)
+- **Case-insensitive uniqueness**: Use `citext` PostgreSQL extension for Email/Username columns
+- **Timestamps**: Use application-set timestamps (already in User entity with CreatedAt/UpdatedAt)
+- **Entity construction**: User has private constructor + static factory - EF Core will handle correctly
+- **Future considerations**: Optimistic concurrency via xmin, audit fields, paginated queries with created_at index
