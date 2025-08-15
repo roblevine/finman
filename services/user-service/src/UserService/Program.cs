@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using UserService.Infrastructure.Persistence;
+using UserService.Infrastructure.Persistence.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -44,8 +48,28 @@ builder.Services.AddSwaggerGen(c =>
 var healthChecksBuilder = builder.Services.AddHealthChecks()
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Service is running"));
 
-// Repository and service registration - using in-memory implementation
-builder.Services.AddScoped<UserService.Application.Ports.IUserRepository, UserService.Infrastructure.Repositories.InMemoryUserRepository>();
+// Repository and service registration - choose implementation based on environment
+if (builder.Environment.EnvironmentName.Equals("Test", StringComparison.OrdinalIgnoreCase))
+{
+    // Use in-memory repository for tests
+    builder.Services.AddScoped<UserService.Application.Ports.IUserRepository, UserService.Infrastructure.Repositories.InMemoryUserRepository>();
+}
+else
+{
+    // Add PostgreSQL for production/development
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+        ?? "Host=localhost;Port=5432;Database=finman_user_service;Username=finman_user;Password=finman_password";
+
+    builder.Services.AddDbContext<FinmanDbContext>(options =>
+        options.UseNpgsql(connectionString));
+
+    // Add PostgreSQL health check
+    healthChecksBuilder.AddNpgSql(connectionString, name: "postgresql");
+
+    // Use PostgreSQL repository for production/development
+    builder.Services.AddScoped<UserService.Application.Ports.IUserRepository, UserService.Infrastructure.Persistence.Repositories.EfUserRepository>();
+}
+
 builder.Services.AddScoped<UserService.Application.Ports.IPasswordHasher, UserService.Infrastructure.Security.BCryptPasswordHasher>();
 builder.Services.AddScoped<UserService.Application.UseCases.RegisterUserHandler>();
 

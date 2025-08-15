@@ -38,6 +38,9 @@ public class FinmanDbContext : DbContext
                     .IsRequired();
 
                 owned.WithOwner();
+                
+                // Create unique index on email column
+                owned.HasIndex(e => e.Value).IsUnique();
             });
 
             // Username as citext for case-insensitive comparison
@@ -49,6 +52,9 @@ public class FinmanDbContext : DbContext
                     .IsRequired();
 
                 owned.WithOwner();
+                
+                // Create unique index on username column
+                owned.HasIndex(u => u.Value).IsUnique();
             });
 
             entity.Property(u => u.PasswordHash)
@@ -96,10 +102,6 @@ public class FinmanDbContext : DbContext
                 .HasColumnName("deleted_at")
                 .HasColumnType("timestamp with time zone")
                 .IsRequired(false);
-
-            // Unique indexes - use lambda expressions for owned properties
-            entity.HasIndex(u => u.Email.Value).IsUnique();
-            entity.HasIndex(u => u.Username.Value).IsUnique();
         });
     }
 }
