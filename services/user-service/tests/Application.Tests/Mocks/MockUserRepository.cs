@@ -11,34 +11,49 @@ namespace UserService.Tests.Application.Tests.Mocks;
 /// </summary>
 public class MockUserRepository : IUserRepository
 {
+    private readonly ConcurrentDictionary<Guid, User> _byId = new();
     private readonly ConcurrentDictionary<string, User> _byEmail = new();
     private readonly ConcurrentDictionary<string, User> _byUsername = new();
 
-    public bool ForceEmailNotUnique { get; set; }
-    public bool ForceUsernameNotUnique { get; set; }
+    public bool ForceEmailExists { get; set; }
+    public bool ForceUsernameExists { get; set; }
 
-    public Task<bool> IsEmailUniqueAsync(Email email)
+    public Task<bool> ExistsByEmailAsync(Email email)
     {
-        if (ForceEmailNotUnique) return Task.FromResult(false);
-        return Task.FromResult(!_byEmail.ContainsKey(email.Value));
+        if (ForceEmailExists) return Task.FromResult(true);
+        return Task.FromResult(_byEmail.ContainsKey(email.Value));
     }
 
-    public Task<bool> IsUsernameUniqueAsync(Username username)
+    public Task<bool> ExistsByUsernameAsync(Username username)
     {
-        if (ForceUsernameNotUnique) return Task.FromResult(false);
-        return Task.FromResult(!_byUsername.ContainsKey(username.Value));
+        if (ForceUsernameExists) return Task.FromResult(true);
+        return Task.FromResult(_byUsername.ContainsKey(username.Value));
     }
 
-    public Task<User> AddAsync(User user)
+    public Task AddAsync(User user)
     {
+        _byId[user.Id] = user;
         _byEmail[user.Email.Value] = user;
         _byUsername[user.Username.Value] = user;
+        return Task.CompletedTask;
+    }
+
+    public Task<User?> GetByIdAsync(Guid id)
+    {
+        _byId.TryGetValue(id, out User? user);
+        return Task.FromResult(user);
+    }
+
+    public Task<User?> FindByEmailAsync(Email email)
+    {
+        _byEmail.TryGetValue(email.Value, out User? user);
         return Task.FromResult(user);
     }
 
     // Helpers to pre-seed state for tests
     public void SeedUser(User user)
     {
+        _byId[user.Id] = user;
         _byEmail[user.Email.Value] = user;
         _byUsername[user.Username.Value] = user;
     }

@@ -11,16 +11,17 @@ namespace UserService.Infrastructure.Repositories;
 /// </summary>
 public class InMemoryUserRepository : IUserRepository
 {
+    private readonly ConcurrentDictionary<Guid, User> _usersById = new();
     private readonly ConcurrentDictionary<string, User> _usersByEmail = new();
     private readonly ConcurrentDictionary<string, User> _usersByUsername = new();
     private readonly object _lockObject = new();
 
     /// <summary>
-    /// Checks if the given email is unique (not already in use).
+    /// Checks if a user with the given email address already exists.
     /// </summary>
-    /// <param name="email">The email to check for uniqueness.</param>
-    /// <returns>True if the email is unique, false if it's already in use.</returns>
-    public Task<bool> IsEmailUniqueAsync(Email email)
+    /// <param name="email">The email address to check for uniqueness</param>
+    /// <returns>True if a user with this email exists, false otherwise</returns>
+    public Task<bool> ExistsByEmailAsync(Email email)
     {
         ArgumentNullException.ThrowIfNull(email);
         
@@ -28,17 +29,17 @@ public class InMemoryUserRepository : IUserRepository
         lock (_lockObject)
         {
             // Check if email exists in the repository
-            bool isUnique = !_usersByEmail.ContainsKey(email.Value);
-            return Task.FromResult(isUnique);
+            bool exists = _usersByEmail.ContainsKey(email.Value);
+            return Task.FromResult(exists);
         }
     }
 
     /// <summary>
-    /// Checks if the given username is unique (not already in use).
+    /// Checks if a user with the given username already exists.
     /// </summary>
-    /// <param name="username">The username to check for uniqueness.</param>
-    /// <returns>True if the username is unique, false if it's already in use.</returns>
-    public Task<bool> IsUsernameUniqueAsync(Username username)
+    /// <param name="username">The username to check for uniqueness</param>
+    /// <returns>True if a user with this username exists, false otherwise</returns>
+    public Task<bool> ExistsByUsernameAsync(Username username)
     {
         ArgumentNullException.ThrowIfNull(username);
         
@@ -46,20 +47,17 @@ public class InMemoryUserRepository : IUserRepository
         lock (_lockObject)
         {
             // Check if username exists in the repository
-            bool isUnique = !_usersByUsername.ContainsKey(username.Value);
-            return Task.FromResult(isUnique);
+            bool exists = _usersByUsername.ContainsKey(username.Value);
+            return Task.FromResult(exists);
         }
     }
 
     /// <summary>
-    /// Adds a new user to the repository or updates an existing user.
-    /// When adding, both email and username keys are updated simultaneously
-    /// to maintain consistency between the two lookup dictionaries.
-    /// Uses locking to ensure atomic updates across both dictionaries.
+    /// Adds a new user to the repository.
     /// </summary>
-    /// <param name="user">The user to add to the repository.</param>
-    /// <returns>The added user.</returns>
-    public Task<User> AddAsync(User user)
+    /// <param name="user">The user entity to add</param>
+    /// <exception cref="InvalidOperationException">Thrown when a user with the same email or username already exists</exception>
+    public Task AddAsync(User user)
     {
         ArgumentNullException.ThrowIfNull(user);
 
@@ -67,28 +65,57 @@ public class InMemoryUserRepository : IUserRepository
         var emailKey = user.Email.Value;
         var usernameKey = user.Username.Value;
 
-        // Use lock to ensure atomic operations across both dictionaries
+        // Use lock to ensure atomic operations across all dictionaries
         lock (_lockObject)
         {
-            // Check if there's an existing user with this email
-            if (_usersByEmail.TryGetValue(emailKey, out var existingUserByEmail))
+            // Check for duplicate email
+            if (_usersByEmail.ContainsKey(emailKey))
             {
-                // Remove the old username entry for the existing user
-                _usersByUsername.TryRemove(existingUserByEmail.Username.Value, out _);
+                throw new InvalidOperationException($"A user with email '{emailKey}' already exists.");
             }
 
-            // Check if there's an existing user with this username
-            if (_usersByUsername.TryGetValue(usernameKey, out var existingUserByUsername))
+            // Check for duplicate username
+            if (_usersByUsername.ContainsKey(usernameKey))
             {
-                // Remove the old email entry for the existing user
-                _usersByEmail.TryRemove(existingUserByUsername.Email.Value, out _);
+                throw new InvalidOperationException($"A user with username '{usernameKey}' already exists.");
             }
 
-            // Add/update both dictionaries with the new user
-            _usersByEmail.AddOrUpdate(emailKey, user, (key, oldUser) => user);
-            _usersByUsername.AddOrUpdate(usernameKey, user, (key, oldUser) => user);
+            // Add to all dictionaries
+            _usersById[user.Id] = user;
+            _usersByEmail[emailKey] = user;
+            _usersByUsername[usernameKey] = user;
         }
 
-        return Task.FromResult(user);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Retrieves a user by their unique identifier.
+    /// </summary>
+    /// <param name="id">The unique identifier of the user</param>
+    /// <returns>The user entity if found, null otherwise</returns>
+    public Task<User?> GetByIdAsync(Guid id)
+    {
+        lock (_lockObject)
+        {
+            _usersById.TryGetValue(id, out User? user);
+            return Task.FromResult(user);
+        }
+    }
+
+    /// <summary>
+    /// Finds a user by their email address.
+    /// </summary>
+    /// <param name="email">The email address to search for</param>
+    /// <returns>The user entity if found, null otherwise</returns>
+    public Task<User?> FindByEmailAsync(Email email)
+    {
+        ArgumentNullException.ThrowIfNull(email);
+        
+        lock (_lockObject)
+        {
+            _usersByEmail.TryGetValue(email.Value, out User? user);
+            return Task.FromResult(user);
+        }
     }
 }

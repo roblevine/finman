@@ -29,14 +29,14 @@ public class RegisterUserHandler
         var lastName = new PersonName(request.LastName);
 
         // Check uniqueness constraints
-        var isEmailUnique = await _userRepository.IsEmailUniqueAsync(email);
-        if (!isEmailUnique)
+        var emailExists = await _userRepository.ExistsByEmailAsync(email);
+        if (emailExists)
         {
             throw new UniquenessViolationException($"Email '{email.Value}' is already registered");
         }
 
-        var isUsernameUnique = await _userRepository.IsUsernameUniqueAsync(username);
-        if (!isUsernameUnique)
+        var usernameExists = await _userRepository.ExistsByUsernameAsync(username);
+        if (usernameExists)
         {
             throw new UniquenessViolationException($"Username '{username.Value}' is already taken");
         }
@@ -48,16 +48,16 @@ public class RegisterUserHandler
         var user = User.Create(email, username, firstName, lastName, hashedPassword);
 
         // Persist user
-        var savedUser = await _userRepository.AddAsync(user);
+        await _userRepository.AddAsync(user);
 
         // Return response
         return new RegisterResponse
         {
-            Id = savedUser.Id,
-            Email = savedUser.Email.Value,
-            Username = savedUser.Username.Value,
-            FullName = savedUser.FullName,
-            CreatedAt = savedUser.CreatedAt
+            Id = user.Id,
+            Email = user.Email.Value,
+            Username = user.Username.Value,
+            FullName = user.FullName,
+            CreatedAt = user.CreatedAt
         };
     }
 }

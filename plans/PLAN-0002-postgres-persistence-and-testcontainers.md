@@ -67,14 +67,16 @@ Out of scope (for this phase):
 - [✅] Extend `src/UserService/docker-compose.yml` with a `postgres` service (postgres:16-alpine), volume, healthcheck, and port mapping; define default env (POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB)
 - [✅] Update `scripts/setup.sh` to optionally start Postgres via compose and export a `POSTGRES_CONNECTION` suitable for local runs
 
-### Phase 2 – Application ports
-- [ ] Define `Application/Ports/IUserRepository` with:
-  - [ ] Task<bool> ExistsByEmail(Email email)
-  - [ ] Task<bool> ExistsByUsername(Username username)
-  - [ ] Task Add(User user)
-  - [ ] Task<User?> GetById(Guid id)
-  - [ ] Task<User?> FindByEmail(Email email)
-- [ ] Verify `User` entity in Domain supports these needs (already exists with value objects)
+### Phase 2 – Application ports  
+- [✅] Define `Application/Ports/IUserRepository` with:
+  - [✅] Task<bool> ExistsByEmailAsync(Email email)
+  - [✅] Task<bool> ExistsByUsernameAsync(Username username)
+  - [✅] Task AddAsync(User user)
+  - [✅] Task<User?> GetByIdAsync(Guid id)
+  - [✅] Task<User?> FindByEmailAsync(Email email)
+- [✅] Verify `User` entity in Domain supports these needs (already exists with value objects)
+- [✅] Update `InMemoryUserRepository` implementation to match new interface
+- [✅] Update `RegisterUserHandler` and all test code to use new method signatures
 
 ### Phase 3 – Infrastructure persistence
 - [ ] Create `Infrastructure/Persistence/FinmanDbContext` with a Users DbSet

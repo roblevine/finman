@@ -271,12 +271,12 @@ public class AuthControllerTests : IClassFixture<AuthTestWebApplicationFactory>
         using var scope = _factory.Services.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
         
-        // Check email uniqueness (should return false since user exists)
-        var isEmailUnique = await repository.IsEmailUniqueAsync(new Email("persist@example.com"));
-        Assert.False(isEmailUnique);
+        // Check email uniqueness (should return true since user exists)
+        var emailExists = await repository.ExistsByEmailAsync(new Email("persist@example.com"));
+        Assert.True(emailExists);
 
-        // Check username uniqueness (should return false since user exists)
-        var isUsernameUnique = await repository.IsUsernameUniqueAsync(new Username("persistuser"));
-        Assert.False(isUsernameUnique);
+        // Check username uniqueness (should return true since user exists)
+        var usernameExists = await repository.ExistsByUsernameAsync(new Username("persistuser"));
+        Assert.True(usernameExists);
     }
 }

@@ -47,8 +47,8 @@ public class RegisterUserTests
         Assert.True(response.CreatedAt > DateTime.MinValue);
         
         // Verify user was persisted and uniqueness constraints now fail
-        Assert.False(await _mockRepo.IsEmailUniqueAsync(new Email(request.Email)));
-        Assert.False(await _mockRepo.IsUsernameUniqueAsync(new Username(request.Username)));
+        Assert.True(await _mockRepo.ExistsByEmailAsync(new Email(request.Email)));
+        Assert.True(await _mockRepo.ExistsByUsernameAsync(new Username(request.Username)));
     }
 
     [Fact]
@@ -236,8 +236,8 @@ public class RegisterUserTests
         Assert.NotNull(response);
 
         // Now force conflicts and verify they're detected
-        _mockRepo.ForceEmailNotUnique = true;
-        _mockRepo.ForceUsernameNotUnique = true;
+        _mockRepo.ForceEmailExists = true;
+        _mockRepo.ForceUsernameExists = true;
 
         var anotherRequest = new RegisterRequest
         {
