@@ -1,9 +1,10 @@
 # Plan: PostgreSQL persistence and Testcontainers
 
-**Status:** IN PROGRESS (Phase 3/8 Complete)  
+**Status:** IN PROGRESS (Phase 4/8 Complete)  
 **Started:** 2025-08-10  
 **Resumed:** 2025-08-15  
-**Phase 3 Completed:** 2025-08-15
+**Phase 3 Completed:** 2025-08-15  
+**Phase 4 Completed:** 2025-08-15
 
 ## Overview
 Introduce durable persistence using PostgreSQL while preserving the existing Hexagonal (Ports & Adapters) architecture. We will use EF Core with Npgsql for data access and code-first migrations, and DotNet.Testcontainers to run real PostgreSQL instances during integration tests. Scope includes schema/modeling for Users, repository ports and adapters, DI wiring, local dev experience (Docker), and a minimal migration workflow. Out of scope: full auth flows or advanced aggregates beyond Users.
@@ -49,7 +50,7 @@ Out of scope (for this phase):
 
 ## Progress Summary
 
-### ✅ **Completed Phases (1-3)**
+### ✅ **Completed Phases (1-4)**
 **Phase 1**: Dependencies and local PostgreSQL setup complete
 - Added EF Core 9.0.8, Npgsql 9.0.4, health checks, and Testcontainers dependencies
 - Extended docker-compose.yml with PostgreSQL 16-alpine service
@@ -68,8 +69,15 @@ Out of scope (for this phase):
 - Enhanced health checks with PostgreSQL monitoring
 - **Test Results**: 114/115 tests passing (1 unrelated Swagger test failure)
 
-### 🚧 **Next Phases (4-8)**
-**Phase 4**: Complete connection string configuration and auto-migration feature
+**Phase 4**: Auto-migration feature and test infrastructure complete
+- Implemented environment-aware auto-migration logic with MIGRATE_AT_STARTUP flag
+- Enhanced appsettings.Development.json with PostgreSQL configuration and EF Core logging
+- Created comprehensive .env.example with PostgreSQL setup documentation
+- Resolved EF Core version conflicts across all test projects (9.0.8 consistency)
+- Fixed TestWebApplicationFactory with proper health check overrides for test isolation
+- **Test Results**: All 115 tests passing (57 Infrastructure + 10 Application + 48 Domain)
+
+### 🚧 **Next Phases (5-8)**
 **Phase 5**: Advanced repository features and optimization  
 **Phase 6**: Testcontainers-based integration tests
 **Phase 7**: End-to-end persistence wiring with use cases
@@ -144,8 +152,16 @@ Out of scope (for this phase):
   - [✅] Register DbContext with UseNpgsql(POSTGRES_CONNECTION)
   - [✅] Add health checks: `.AddNpgSql(POSTGRES_CONNECTION)` alongside existing self check
   - [✅] Environment-aware configuration: PostgreSQL for Production/Development, InMemory for Test
-  - [ ] On startup in Development and when `MIGRATE_AT_STARTUP=true`, run `db.Database.Migrate()`
+  - [✅] On startup in Development and when `MIGRATE_AT_STARTUP=true`, run `db.Database.Migrate()`
 - [✅] Register repository adapter: `IUserRepository` -> `EfUserRepository`
+- [✅] Enhanced configuration system:
+  - [✅] Added MIGRATE_AT_STARTUP flag with safe defaults (false)
+  - [✅] Created comprehensive .env.example with PostgreSQL setup instructions
+  - [✅] Enhanced appsettings.Development.json with connection strings and EF Core logging
+- [✅] Test infrastructure improvements:
+  - [✅] Fixed EF Core version conflicts across all test projects (9.0.8 consistency)
+  - [✅] Enhanced TestWebApplicationFactory with proper service overrides for PostgreSQL health checks
+  - [✅] **Result**: All 115 tests passing
 
 ### Phase 5 – Repository adapter
 - [✅] Implement `Infrastructure/Persistence/Repositories/EfUserRepository` with the port methods

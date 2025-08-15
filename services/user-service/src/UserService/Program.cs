@@ -75,6 +75,32 @@ builder.Services.AddScoped<UserService.Application.UseCases.RegisterUserHandler>
 
 var app = builder.Build();
 
+// Auto-migrate database in Development when MIGRATE_AT_STARTUP is enabled
+if (app.Environment.IsDevelopment() && 
+    !builder.Environment.EnvironmentName.Equals("Test", StringComparison.OrdinalIgnoreCase))
+{
+    var migrateAtStartup = app.Configuration.GetValue<bool>("MIGRATE_AT_STARTUP", false);
+    if (migrateAtStartup)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetService<FinmanDbContext>();
+        if (dbContext != null)
+        {
+            try
+            {
+                app.Logger.LogInformation("MIGRATE_AT_STARTUP enabled: Applying database migrations...");
+                dbContext.Database.Migrate();
+                app.Logger.LogInformation("Database migrations applied successfully");
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogError(ex, "Failed to apply database migrations during startup");
+                // Don't fail startup - let the app continue and handle DB issues via health checks
+            }
+        }
+    }
+}
+
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();
 
