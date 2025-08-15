@@ -8,8 +8,11 @@ This service follows Hexagonal Architecture (Ports and Adapters) pattern and pro
 
 - User registration with email/username uniqueness validation
 - Password hashing using BCrypt
+- PostgreSQL persistence with EF Core (Production/Development)
+- In-memory storage for testing
+- Environment-aware configuration
 - RESTful API endpoints
-- Comprehensive health checks
+- Comprehensive health checks (including PostgreSQL monitoring)
 
 ## Architecture
 
@@ -18,7 +21,11 @@ This service follows Hexagonal Architecture (Ports and Adapters) pattern and pro
 │   └── UserService/               # Main application
 │       ├── Domain/               # Business entities and rules
 │       ├── Application/          # Use cases and DTOs
-│       └── Infrastructure/       # Web controllers, repositories, security
+│       └── Infrastructure/       # Web controllers, repositories, security, persistence
+│           ├── Persistence/      # EF Core DbContext, repositories, migrations
+│           ├── Repositories/     # In-memory implementations for testing
+│           ├── Security/         # BCrypt password hashing
+│           └── Web/              # Controllers and API layer
 ├── tests/                        # Test projects
 ├── scripts/                      # Build, test, and run scripts
 └── UserService.sln              # Solution file
@@ -57,16 +64,42 @@ cd services/user-service
 
 The service uses xUnit with comprehensive test coverage across:
 
-- **Domain Tests**: Value objects and entities
-- **Application Tests**: Use cases and business logic  
-- **Infrastructure Tests**: Controllers, repositories, security, integration tests
+- **Domain Tests**: Value objects and entities (48 tests)
+- **Application Tests**: Use cases and business logic (10 tests)
+- **Infrastructure Tests**: Controllers, repositories, security, integration tests (57 tests)
 
-All tests must pass before deployment. Current coverage includes 125 tests across all layers.
+All tests must pass before deployment. Current status: **114/115 tests passing** (1 unrelated Swagger test failure).
+
+**Test Strategy**: 
+- Production/Development environments use PostgreSQL persistence
+- Test environment uses in-memory repositories for fast, isolated testing
+- Future: Testcontainers integration tests for end-to-end PostgreSQL validation
 
 ## Dependencies
 
 - .NET 8.0
 - ASP.NET Core
-- BCrypt for password hashing
+- **PostgreSQL** with EF Core 9.0.8 and Npgsql 9.0.4 (Production/Development)
+- BCrypt for password hashing  
 - Swagger for API documentation (Development only)
 - xUnit for testing
+- DotNet.Testcontainers for integration testing
+
+## Persistence
+
+The service uses **environment-aware persistence**:
+
+- **Production/Development**: PostgreSQL with EF Core
+  - Rich value object mappings using OwnsOne pattern
+  - PostgreSQL `citext` extension for case-insensitive email/username uniqueness
+  - Automatic health checks for database connectivity
+  - Code-first migrations with version control
+  
+- **Test Environment**: In-memory repository
+  - Fast, isolated testing without external dependencies
+  - Full compatibility with existing test suite
+
+Configuration via connection string:
+```
+DefaultConnection: "Host=localhost;Port=5432;Database=finman_user_service;Username=finman_user;Password=finman_password"
+```

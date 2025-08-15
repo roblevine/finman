@@ -1,8 +1,9 @@
 # Plan: PostgreSQL persistence and Testcontainers
 
-**Status:** IN PROGRESS  
+**Status:** IN PROGRESS (Phase 3/8 Complete)  
 **Started:** 2025-08-10  
-**Resumed:** 2025-08-15
+**Resumed:** 2025-08-15  
+**Phase 3 Completed:** 2025-08-15
 
 ## Overview
 Introduce durable persistence using PostgreSQL while preserving the existing Hexagonal (Ports & Adapters) architecture. We will use EF Core with Npgsql for data access and code-first migrations, and DotNet.Testcontainers to run real PostgreSQL instances during integration tests. Scope includes schema/modeling for Users, repository ports and adapters, DI wiring, local dev experience (Docker), and a minimal migration workflow. Out of scope: full auth flows or advanced aggregates beyond Users.
@@ -46,6 +47,34 @@ Out of scope (for this phase):
 - Concurrency: rely on DB uniqueness constraints; consider optimistic concurrency token later (xmin)
 - Observability: EF Core logging at Information in Development; optional slow query logging threshold
 
+## Progress Summary
+
+### ✅ **Completed Phases (1-3)**
+**Phase 1**: Dependencies and local PostgreSQL setup complete
+- Added EF Core 9.0.8, Npgsql 9.0.4, health checks, and Testcontainers dependencies
+- Extended docker-compose.yml with PostgreSQL 16-alpine service
+- Updated setup scripts for local development
+
+**Phase 2**: Application ports enhancement complete  
+- Enhanced IUserRepository interface with 5 comprehensive methods
+- Updated all implementations (InMemory, Mock, RegisterUserHandler)
+- Maintained full backward compatibility with existing functionality
+
+**Phase 3**: Infrastructure persistence layer complete
+- Created FinmanDbContext with sophisticated value object mappings using OwnsOne pattern
+- Generated initial EF Core migration (20250815163136_InitialUsers) with PostgreSQL citext support
+- Implemented comprehensive EfUserRepository with proper error handling and PostgreSQL optimizations
+- Added environment-aware DI configuration (PostgreSQL for prod/dev, InMemory for tests)
+- Enhanced health checks with PostgreSQL monitoring
+- **Test Results**: 114/115 tests passing (1 unrelated Swagger test failure)
+
+### 🚧 **Next Phases (4-8)**
+**Phase 4**: Complete connection string configuration and auto-migration feature
+**Phase 5**: Advanced repository features and optimization  
+**Phase 6**: Testcontainers-based integration tests
+**Phase 7**: End-to-end persistence wiring with use cases
+**Phase 8**: Development experience and documentation updates
+
 ## Implementation Steps
 
 ### Phase 0 – Baseline and guardrails
@@ -79,38 +108,49 @@ Out of scope (for this phase):
 - [✅] Update `RegisterUserHandler` and all test code to use new method signatures
 
 ### Phase 3 – Infrastructure persistence
-- [ ] Create `Infrastructure/Persistence/FinmanDbContext` with a Users DbSet
-- [ ] Add `Infrastructure/Persistence/Configurations/UserConfiguration` with Fluent API:
-  - [ ] Primary key, property lengths
-  - [ ] **Value object conversions using OwnsOne pattern**:
-    - [ ] `Email`: Store as CITEXT, use `HasConversion<string>()` with Email's implicit operators
-    - [ ] `Username`: Store as CITEXT, use `HasConversion<string>()` with Username's implicit operators  
-    - [ ] `PersonName`: Use `OwnsOne()` to map FirstName/LastName as separate TEXT columns
-  - [ ] Enable citext via migration SQL; map Email/Username columns to `citext` 
-  - [ ] Unique indexes on email and username
-  - [ ] Timestamps with UTC handling
-- [ ] Create initial migration `20250815_0001_Users`:
-  - [ ] Execute `CREATE EXTENSION IF NOT EXISTS citext;`
-  - [ ] Create table `users` with:
-    - [ ] id UUID (PK)
-    - [ ] email CITEXT UNIQUE
-    - [ ] username CITEXT UNIQUE
-    - [ ] first_name TEXT, last_name TEXT
-    - [ ] password_hash TEXT
-    - [ ] created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ
-    - [ ] is_active BOOLEAN, is_deleted BOOLEAN, deleted_at TIMESTAMPTZ
+- [✅] Create `Infrastructure/Persistence/FinmanDbContext` with a Users DbSet
+- [✅] Add `Infrastructure/Persistence/Configurations/UserConfiguration` with Fluent API:
+  - [✅] Primary key, property lengths
+  - [✅] **Value object conversions using OwnsOne pattern**:
+    - [✅] `Email`: Store as CITEXT, use `HasConversion<string>()` with Email's implicit operators
+    - [✅] `Username`: Store as CITEXT, use `HasConversion<string>()` with Username's implicit operators  
+    - [✅] `PersonName`: Use `OwnsOne()` to map FirstName/LastName as separate TEXT columns
+  - [✅] Enable citext via migration SQL; map Email/Username columns to `citext` 
+  - [✅] Unique indexes on email and username
+  - [✅] Timestamps with UTC handling
+- [✅] Create initial migration `20250815163136_InitialUsers`:
+  - [✅] Execute `CREATE EXTENSION IF NOT EXISTS citext;`
+  - [✅] Create table `users` with:
+    - [✅] id UUID (PK)
+    - [✅] email CITEXT UNIQUE
+    - [✅] username CITEXT UNIQUE
+    - [✅] first_name TEXT, last_name TEXT
+    - [✅] password_hash TEXT
+    - [✅] created_at TIMESTAMPTZ, updated_at TIMESTAMPTZ
+    - [✅] is_active BOOLEAN, is_deleted BOOLEAN, deleted_at TIMESTAMPTZ
+- [✅] Create `Infrastructure/Persistence/Repositories/EfUserRepository` implementation:
+  - [✅] Implement all IUserRepository methods with proper async patterns
+  - [✅] Handle value object conversions with EF Core mappings
+  - [✅] Map `DbUpdateException` (unique violations) to domain-specific exceptions
+  - [✅] PostgreSQL-specific error handling and case-insensitive queries
+- [✅] Wire up environment-aware DI configuration in `Program.cs`:
+  - [✅] Use EfUserRepository for Production/Development environments
+  - [✅] Maintain InMemoryUserRepository for Test environment
+  - [✅] Register FinmanDbContext with PostgreSQL connection
+  - [✅] Add PostgreSQL health checks alongside existing self-check
 
 ### Phase 4 – DI wiring and health
-- [ ] In `Program.cs`:
-  - [ ] Register DbContext with UseNpgsql(POSTGRES_CONNECTION)
-  - [ ] Add health checks: `.AddNpgSql(POSTGRES_CONNECTION)` alongside existing self check
+- [✅] In `Program.cs`:
+  - [✅] Register DbContext with UseNpgsql(POSTGRES_CONNECTION)
+  - [✅] Add health checks: `.AddNpgSql(POSTGRES_CONNECTION)` alongside existing self check
+  - [✅] Environment-aware configuration: PostgreSQL for Production/Development, InMemory for Test
   - [ ] On startup in Development and when `MIGRATE_AT_STARTUP=true`, run `db.Database.Migrate()`
-- [ ] Register repository adapter: `IUserRepository` -> `EfUserRepository`
+- [✅] Register repository adapter: `IUserRepository` -> `EfUserRepository`
 
 ### Phase 5 – Repository adapter
-- [ ] Implement `Infrastructure/Persistence/Repositories/EfUserRepository` with the port methods
-- [ ] Handle value object conversions properly (EF will use the configured conversions)
-- [ ] Map `DbUpdateException` (unique violations) to domain-specific errors where needed
+- [✅] Implement `Infrastructure/Persistence/Repositories/EfUserRepository` with the port methods
+- [✅] Handle value object conversions properly (EF will use the configured conversions)
+- [✅] Map `DbUpdateException` (unique violations) to domain-specific errors where needed
 
 ### Phase 6 – Integration tests (Testcontainers)
 - [ ] Add a shared xUnit fixture implementing `IAsyncLifetime` that:
