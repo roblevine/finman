@@ -325,3 +325,36 @@ The monorepo restructure was completed successfully on August 13, 2025:
 - **Clean Structure**: No redundant files or orphaned artifacts
 
 This foundation enables future service expansion, infrastructure orchestration, and unified frontend development while maintaining service independence and development workflow familiarity.
+
+
+## Architecture and layout
+- Hexagonal (Ports & Adapters). Current service: `src/UserService`.
+	- Domain: `Domain/{Entities,ValueObjects,Exceptions}`
+	- Application: `Application/{Ports,UseCases,DTOs}`
+	- Infrastructure: `Infrastructure/Web/Controllers`
+	- Composition root: `Program.cs` (partial for tests)
+- See `HelloController.cs` for controller style; `Program.cs` registers controllers, Swagger (Dev), and health checks.
+
+*For detailed technical architecture and design patterns, see [ARCHITECTURE.md](ARCHITECTURE.md).*
+
+## Endpoints (UserService)
+- GET `/api/hello` → 200 JSON `{ message, timestamp, version }`
+- GET `/api/hello/{name}` → 200 personalized; 400 for empty/whitespace
+- GET `/health` → 200 "Healthy"
+- Swagger (Dev): `/swagger`, `/swagger/v1/swagger.json`
+
+## Conventions
+- Tests: xUnit; do not use FluentAssertions (see ARCHITECTURE.md). Mirror target layer in `tests/*`.
+- Controllers: `[ApiController]`, `[Route("api/...“)]`, `[Produces("application/json")]`; return `ActionResult<T>` with `[ProducesResponseType]`. Example returns `HelloResponse` record (init-only props).
+- Health checks: `AddHealthChecks().AddCheck("self", ...)` + `app.MapHealthChecks("/health")`.
+- Swagger enabled only in Development in `Program.cs`.
+- Test host: `TestWebApplicationFactory` forces `Development` and sets JSON `camelCase`.
+
+## Extending safely
+1) Write tests (`tests/*`), including minimal integration via `WebApplicationFactory`.
+2) Define ports in `Application/Ports`; add use cases in `Application/UseCases`.
+3) Update domain in `Domain/*` (framework-free logic).
+4) Implement adapters in `Infrastructure/*`; wire in `Program.cs`.
+5) Run `build.sh`, then `run.sh`; validate with `/health`, `/swagger`, endpoints, and tests.
+
+Key references: `src/UserService/Infrastructure/Web/Controllers/HelloController.cs`, `src/UserService/Program.cs`, `tests/Infrastructure.Tests/*`.
