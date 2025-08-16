@@ -32,3 +32,24 @@ else
     echo "❌ Docker test failed"
     exit 1
 fi
+
+echo ""
+echo ""
+
+
+echo "🔍 Testing docker compose availability..."
+
+# Check if docker-compose command exists
+if ! command -v docker-compose &> /dev/null; then
+    echo "❌ docker-compose command not found"
+    exit 1
+fi
+
+# Test basic docker-compose functionality
+echo "🧪 Testing basic docker-compose functionality..."
+if docker-compose config > /dev/null 2>&1; then
+    echo "✅ Docker Compose is working correctly!"
+else
+    echo "❌ Docker Compose test failed"
+    exit 1
+fi
