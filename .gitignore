@@ -483,4 +483,7 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
+# SSH keys (security)
+.devcontainer/.ssh-public-key
+
 .claude
