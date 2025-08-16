@@ -11,39 +11,13 @@ The Finman application follows a **monorepo microservices architecture** with th
 - **Deployment**: Independently deployable containerized services
 - **Shared Libraries**: Common domain models, infrastructure, and testing utilities
 
-### Monorepo Structure
+### Design Philosophy
+- **Backend-First Development**: APIs establish core business logic and data models before frontend implementation
+- **Service Independence**: Each service can be built, tested, and deployed independently
+- **Clean Communication**: Services communicate exclusively via HTTP APIs
+- **Shared Code Discipline**: Common libraries grown organically as genuine cross-service needs arise
 
-```
-finman/
-├── services/
-│   ├── user-service/              # User authentication & management
-│   │   ├── src/UserService/       # Main application code
-│   │   ├── tests/                 # Service-specific tests
-│   │   ├── scripts/               # Service build/test/run scripts
-│   │   ├── UserService.sln        # Independent solution
-│   │   └── README.md             # Service documentation
-│   ├── shared/                    # Shared libraries
-│   │   ├── Finman.Shared.Domain/           # Common domain models
-│   │   ├── Finman.Shared.Infrastructure/   # Common infrastructure
-│   │   ├── Finman.Shared.Testing/          # Test utilities
-│   │   └── Finman.Shared.sln               # Shared solution
-│   └── [future-service]/          # Additional services
-├── frontend/
-│   └── web-app/                   # Next.js SPA (future)
-├── infrastructure/                # Docker, deployment configs
-├── scripts/                       # Root-level orchestration scripts
-├── docs/                         # Architecture documentation
-└── plans/                        # Implementation plans & ADRs
-```
-
-### Development Approach
-**Backend-First Development**: APIs are developed first to establish core business logic and data models. The frontend will be implemented later and will consume multiple backend services, providing a unified user experience.
-
-### Service Independence
-- Each service maintains its own solution file and can be built independently
-- Services communicate via HTTP APIs only (no direct assembly references)
-- Independent versioning and deployment capabilities
-- Shared libraries are consumed as project references (not NuGet packages initially)
+*For detailed monorepo structure and development workflow, see [DEVELOPMENT.md](DEVELOPMENT.md).*
 
 ## Current Services
 

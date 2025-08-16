@@ -1,116 +1,246 @@
 # Finman - Financial Management Platform
 
-**IMPORTANT - PLEASE READ the AI-AGENT.md file for more information on the rules and guidance on contributing to this project.**
+A comprehensive financial management platform built with microservices architecture, designed for investment tracking, portfolio management, and financial analytics.
 
-## Overview
+**For AI Agents**: Please read [AI-AGENT.md](AI-AGENT.md) for development guidelines and working instructions.
 
-Finman is a comprehensive financial management platform built as a monorepo containing multiple microservices with a unified Next.js frontend. The platform will eventually provide full investment tracking, portfolio management, and financial reporting capabilities.
+## What is Finman?
 
-## Architecture
+Finman is a modern financial management platform designed to provide comprehensive investment tracking, portfolio management, and financial reporting capabilities. Built using a microservices architecture within a monorepo structure, it delivers scalable, maintainable financial services with a unified user experience.
 
-This is a **monorepo** structured for microservices development:
+### Key Features
+- **User Management**: Secure user registration and authentication
+- **Investment Tracking**: Real-time investment data and calculations *(planned)*
+- **Portfolio Management**: Advanced portfolio analytics and management *(planned)*
+- **Financial Reporting**: Comprehensive reports and analytics *(planned)*
+- **API-First Design**: RESTful APIs with comprehensive documentation
+
+## Quick Start
+
+Get up and running in minutes:
+
+### 1. Prerequisites
+- **.NET 8.0 SDK**
+- **Docker & Docker Compose**
+
+### 2. Clone and Setup
+```bash
+git clone https://github.com/roblevine/finman.git
+cd finman
+
+# Setup the entire project
+./scripts/setup.sh
+```
+
+### 3. Start the UserService
+```bash
+# Start database
+docker-compose up postgres -d
+
+# Run the UserService
+cd services/user-service
+./scripts/run.sh --local
+```
+
+### 4. Explore the API
+Visit [http://localhost:5001/swagger](http://localhost:5001/swagger) to explore the API documentation and test endpoints.
+
+### 5. Run Tests
+```bash
+# Test all services
+./scripts/test.sh
+
+# Or test specific service
+cd services/user-service
+./scripts/test.sh
+```
+
+## Architecture Overview
+
+Finman uses a **monorepo microservices architecture** that balances service independence with development efficiency:
 
 ```
 finman/
 ├── services/
-│   ├── user-service/              # User authentication & management
-│   ├── shared/                    # Shared libraries (domain, infrastructure, testing)
-│   └── template-service/          # Template for creating new services
-├── frontend/                      # Next.js SPA (future)
-├── infrastructure/                # Docker compose, deployment configs
-├── scripts/                       # Root-level build/test/run scripts (working)
-├── docs/                         # Architecture and design documentation
-└── plans/                        # Implementation plans and ADRs
+│   ├── user-service/              # ✅ User authentication & management
+│   ├── shared/                    # 📚 Shared libraries and utilities
+│   └── template-service/          # 🛠️ Template for new services
+├── frontend/                      # 🚀 Next.js SPA (planned)
+├── infrastructure/                # 🐳 Docker & deployment configs
+├── docs/                          # 📖 Technical documentation
+└── scripts/                       # ⚡ Build, test, and run automation
 ```
 
-### Current Services
+### Current Status
 
-- **UserService** (`services/user-service/`): User registration, authentication, and profile management
+#### ✅ Completed
+- **User Service**: Full user registration and authentication with BCrypt security
+- **Monorepo Structure**: Multi-service development environment with orchestration
+- **PostgreSQL Integration**: Persistent storage with Entity Framework Core
+- **Comprehensive Testing**: 114+ tests across all architectural layers
+- **Docker Development**: Containerized development and deployment
 
-### Planned Services
+#### 🚧 In Progress  
+- **Documentation Reorganization**: Streamlining and consolidating project documentation
 
-- **InvestmentService**: Investment data and calculations
-- **PortfolioService**: Portfolio management and aggregations  
-- **ReportingService**: Financial reports and analytics
-- **NotificationService**: User notifications
+#### 📋 Planned
+- **Investment Service**: Real-time investment data and calculations
+- **Portfolio Service**: Portfolio management and analytics
+- **Reporting Service**: Financial reports and dashboards
+- **Frontend Application**: React-based web interface
+- **Notification Service**: User notifications and alerts
+
+### Architectural Principles
+
+Each service follows **Hexagonal Architecture** (Ports and Adapters) ensuring:
+- **Clean Separation**: Business logic isolated from external dependencies
+- **High Testability**: Domain logic can be tested independently  
+- **Flexibility**: Easy to swap databases, APIs, or external services
+- **Maintainability**: Clear boundaries and responsibilities
+
+*For detailed technical architecture and design patterns, see [ARCHITECTURE.md](ARCHITECTURE.md).*
 
 ## Development
 
-### Quick Start
+### Working with Individual Services
 
-Each service can be developed independently:
+Each service is independently developable:
 
 ```bash
-# Work on UserService
 cd services/user-service
-./scripts/test.sh      # Run tests
-./scripts/build.sh     # Build and test
-./scripts/run.sh --local   # Run locally (http://localhost:5001)
+
+# Development cycle
+./scripts/test.sh              # Run comprehensive test suite
+./scripts/build.sh             # Build service and Docker image
+./scripts/run.sh --local       # Run locally with hot reload
+./scripts/run.sh --docker      # Run in Docker container
+
+# API endpoints available at:
+# http://localhost:5001         (local)
+# http://localhost:8080         (Docker)
 ```
 
-### Monorepo Scripts
+### Working with the Full Monorepo
 
-Root-level scripts orchestrate multiple services:
+Orchestrate multiple services from the root:
 
 ```bash
-./scripts/test.sh      # Test all services and shared libraries
-./scripts/build.sh     # Build all services and shared libraries
-./scripts/run.sh       # Run services (with orchestration options)
-./scripts/setup.sh     # Setup entire monorepo
+# From project root
+./scripts/test.sh      # Test all services and shared libraries  
+./scripts/build.sh     # Build all services and create Docker images
+./scripts/run.sh       # Run services with orchestration
 ./scripts/clean.sh     # Clean all build artifacts
 ```
 
-### Service Templates
+### Creating New Services
 
-Create new services using the template:
+Use the provided template for consistent service structure:
 
 ```bash
-# Use services/template-service/ as a starting point
-# Follow the README.md in template-service for guidance
+# Create new service from template
 cp -r services/template-service services/my-new-service
-# Edit and customize the new service
+cd services/my-new-service
+
+# Follow template README for customization
 ```
 
-## Service Architecture
+### Database Development
 
-Each service follows **Hexagonal Architecture** (Ports and Adapters):
+Finman uses PostgreSQL with Docker for development:
 
-- **Domain**: Business entities, value objects, domain services
-- **Application**: Use cases, DTOs, ports (interfaces)
-- **Infrastructure**: Web controllers, repositories, external service adapters
+```bash
+# Start database
+docker-compose up postgres -d
 
-## Getting Started
+# Connection available at:
+# Host: localhost:5432 (from host)
+# Host: postgres:5432 (from containers)
+# Database: finman
+# User: finman / finman_dev_password
+```
 
-1. **Prerequisites**: .NET 8.0, Docker (optional)
+## API Documentation
 
-2. **Clone and explore**:
-   ```bash
-   git clone <repo-url>
-   cd finman
-   ```
+### UserService Endpoints
 
-3. **Start with UserService**:
-   ```bash
-   cd services/user-service
-   ./scripts/setup.sh    # One-time setup
-   ./scripts/test.sh     # Verify everything works
-   ./scripts/run.sh --local  # Start the service
-   ```
+- **GET** `/api/hello` - Service health check with version info
+- **GET** `/api/hello/{name}` - Personalized greeting  
+- **POST** `/api/auth/register` - User registration
+- **GET** `/health` - Health check endpoint
 
-4. **API Documentation**: Visit `http://localhost:5001/swagger` (in Development)
+### Interactive API Documentation
+- **Development**: [http://localhost:5001/swagger](http://localhost:5001/swagger)
+- **OpenAPI Spec**: [http://localhost:5001/swagger/v1/swagger.json](http://localhost:5001/swagger/v1/swagger.json)
 
-## Database (Future)
+## Testing
 
-Local Postgres development support will be added:
-- `./scripts/setup.sh --start-postgres` for local development database
-- Docker Compose orchestration for full-stack development
-- EF Core migrations with `MIGRATE_AT_STARTUP` flag support
+Comprehensive testing strategy across all architectural layers:
+
+```bash
+# Run all tests with coverage
+./scripts/test.sh
+
+# Coverage reports generated in:
+# services/*/TestResults/**/coverage.cobertura.xml
+```
+
+### Test Structure
+- **Domain Tests**: Business logic validation (framework-free)
+- **Application Tests**: Use case and workflow testing
+- **Infrastructure Tests**: API endpoints, database integration, and external services
+
+### Current Test Results
+- **Total Tests**: 114+ passing tests
+- **Domain Layer**: 48 tests - Core business logic
+- **Application Layer**: 10 tests - Use cases and workflows  
+- **Infrastructure Layer**: 56+ tests - APIs, persistence, and integrations
 
 ## Contributing
 
-See individual service README files for service-specific guidance. Follow the established patterns:
+We welcome contributions! Here's how to get involved:
 
-- Test-first development
-- Hexagonal Architecture
-- Independent service deployability
-- Comprehensive documentation
+### Development Methodology
+
+1. **Analyze**: Understand requirements and break down problems
+2. **Plan**: Document approach (create PLAN-*.md for major features)
+3. **Execute**: Implement in small, testable increments
+4. **Review**: Verify functionality and update documentation
+
+### Guidelines
+
+- **Test-First Development**: Write tests before implementing features
+- **Clean Architecture**: Follow Hexagonal Architecture patterns
+- **Service Independence**: Ensure services can be developed and deployed independently
+- **Comprehensive Documentation**: Update relevant documentation with changes
+
+### Getting Help
+
+- **Technical Architecture**: See [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Development Workflow**: See [DEVELOPMENT.md](DEVELOPMENT.md)
+- **Database Setup**: See [docs/database/POSTGRESQL.md](docs/database/POSTGRESQL.md)
+- **Current Work**: See [TODO.md](TODO.md)
+- **Implementation Plans**: Browse [plans/](plans/) directory
+
+## Project Structure
+
+### Key Documentation
+- **[README.md](README.md)** *(this file)* - Project overview and quick start
+- **[AI-AGENT.md](AI-AGENT.md)** - AI agent guidelines and instructions
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed technical architecture
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - Comprehensive development guide
+- **[TODO.md](TODO.md)** - Current status and development roadmap
+
+### Directory Structure
+- **[services/](services/)** - Microservices and shared libraries
+- **[docs/](docs/)** - Technical documentation and guides
+- **[plans/](plans/)** - Implementation plans and architectural decision records
+- **[scripts/](scripts/)** - Build, test, and deployment automation
+- **[infrastructure/](infrastructure/)** - Docker configs and deployment manifests
+
+## License
+
+*License information to be added*
+
+---
+
+**Ready to contribute?** Start with the [Development Guide](DEVELOPMENT.md) or explore the [UserService](services/user-service/) to see the architecture in action.

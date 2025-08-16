@@ -1,44 +1,79 @@
-# AI-AGENT.md
+# AI Agent Guidelines
 
-This file provides guidance to AI Agents (such as Claude Code, GitHub CoPilot, Curtsor, and Windsurf) when working with code in this repository.
+This file provides comprehensive guidance for AI Agents (Claude, GitHub Copilot, Cursor, Windsurf, etc.) working with the Finman financial management platform.
 
-## Important Files
-- **ARCHITECTURE.md**: Outlines the monorepo microservices architecture, service structure, and design patterns.
-- **README.md**: Contains the introduction and overview of the Finman monorepo, including how to build, run, and test services.
-- **TODO.md**: Lists tasks and features to be implemented across all services.
-- **plans/**: Implementation plans and architectural decision records for major features and changes.
+## Documentation Navigation
 
-This file (AI-AGENT.md) contains ways of working instructions for AI Agents, including how to interpret and generate code, as well as guidelines for contributing to the Finman monorepo.
+### Primary Documentation
+- **[README.md](README.md)**: Human-facing project overview, quick start, and architecture summary
+- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed technical architecture and design patterns
+- **[DEVELOPMENT.md](DEVELOPMENT.md)**: Comprehensive development workflow and monorepo guidance
+- **[TODO.md](TODO.md)**: Current project status, completed features, and development roadmap
 
-## Monorepo Structure Guidelines
-- This is a **monorepo** containing multiple microservices in `services/`
-- Each service in `services/` is independent and has its own solution file, tests, and scripts
-- Shared libraries are in `services/shared/` and consumed as project references
-- For service-specific work, navigate to the service directory (e.g., `services/user-service/`)
-- Use service-specific scripts for individual service development
-- Root-level scripts (when implemented) orchestrate multiple services
+### Supporting Documentation
+- **[docs/database/POSTGRESQL.md](docs/database/POSTGRESQL.md)**: Database setup, configuration, and current implementation
+- **[plans/](plans/)**: Implementation plans and architectural decision records for major features
+- **Service READMEs**: Individual service documentation in `services/*/README.md`
 
-## Current Services
-- **UserService** (`services/user-service/`): User authentication and management
-- **Shared Libraries** (`services/shared/`): Common domain, infrastructure, and testing utilities (currently empty, populated as needed)
+### Quick Reference
+- **Project Structure**: See [README.md](README.md#project-structure)
+- **Development Workflow**: See [DEVELOPMENT.md](DEVELOPMENT.md#development-workflow)  
+- **Architecture Patterns**: See [ARCHITECTURE.md](ARCHITECTURE.md#hexagonal-architecture-pattern)
+- **Database Setup**: See [docs/database/POSTGRESQL.md](docs/database/POSTGRESQL.md#quick-start)
 
-## Guidelines for AI Agents
-- Always start every interactions with a the message "Hi Rob!" - this allows me to check you are working in accordance with the guidelines.
-- Always refer to the **ARCHITECTURE.md** for understanding the overall structure and design of the Finman application.
-- Use the **README.md** for context on how to set up and run the application.
-- Follow the tasks outlined in **TODO.md** for implementing new features or fixing bugs.
-- For building, running, testing, etc - always use the scripts provided in the service's "scripts" folder. Each service has its own scripts for independent development.
-- For monorepo-wide operations, use root-level scripts (when implemented).
+## Monorepo Architecture
 
-## Development Workflow
-- We are a coding pair. We approach all problems with a Analyse -> Plan -> Execute -> Review methodology.
-- We deliver individual features in small, incremental slices. For instance, if adding a new service - start with basic structure, then add core functionality incrementally.
-- **Service Independence**: When working on a service, navigate to its directory and use its scripts. Services should remain independently developable.
-- **Shared Libraries**: Only add code to `services/shared/` when genuinely needed by multiple services. Keep libraries minimal and focused.
-- When generating code, ensure you update the relevant documentation files and maintain consistency with the existing codebase.
-- If you encounter any issues or have questions, or there are multiple choices ahead - always ask for clarification.
-- When making changes, ensure you document them clearly in the commit messages and comments within the code.
-- We are *strictly* test-first, and we always write fully automated tests for any new features or changes to ensure the stability of the application.
-- Always discuss before bringing in new dependencies/packages, as I might have preferences or not want to use particular choices.
-- Prefer clean object-oriented design and follow SOLID principles.
-- Use meaningful variable and function names to enhance code readability.
+### Structure Overview
+- **Monorepo Pattern**: Multiple independent microservices in single repository
+- **Service Independence**: Each service has own solution, tests, and build scripts
+- **Shared Libraries**: Common code in `services/shared/` consumed as project references
+- **Template-Driven**: Use `services/template-service/` for creating new services
+- **Hexagonal Architecture**: All services follow Ports and Adapters pattern
+
+### Current Services
+- **UserService** (`services/user-service/`): User registration and authentication with PostgreSQL persistence
+- **Shared Libraries** (`services/shared/`): Domain, infrastructure, and testing utilities (minimal, grown as needed)
+- **Template Service** (`services/template-service/`): Standard template for new service creation
+
+## AI Agent Working Instructions
+
+### Essential Guidelines
+- **Always start interactions with "Hi Rob!"** - This confirms you're following these guidelines
+- **Use scripts exclusively** for build/test/run operations - never run dotnet/docker commands directly
+- **Test-first development** - Write tests before implementing functionality
+- **Small increments** - Deliver features in testable, reviewable slices
+- **Documentation updates** - Keep docs current with any changes made
+
+### Development Context Navigation
+1. **Project Overview**: Start with [README.md](README.md) for understanding project goals and structure
+2. **Technical Details**: Refer to [ARCHITECTURE.md](ARCHITECTURE.md) for design patterns and service structure  
+3. **Development Process**: Use [DEVELOPMENT.md](DEVELOPMENT.md) for workflow and operational guidance
+4. **Current Work**: Check [TODO.md](TODO.md) for ongoing tasks and project status
+5. **Database Operations**: Reference [docs/database/POSTGRESQL.md](docs/database/POSTGRESQL.md) for database setup and management
+
+## Development Methodology
+
+### Core Workflow: Analyse → Plan → Execute → Review
+1. **Analyse**: Break down requirements, understand existing codebase context
+2. **Plan**: Document approach (create PLAN-*.md for major features)  
+3. **Execute**: Implement in small, testable increments with comprehensive tests
+4. **Review**: Verify functionality, update documentation, ensure no regressions
+
+### Service Development Principles
+- **Script-Based Operations**: Always use provided scripts (`./scripts/test.sh`, `./scripts/build.sh`, etc.)
+- **Service Independence**: Work within service directories, maintain independent deployability
+- **Shared Library Discipline**: Only add to `services/shared/` when genuinely needed by multiple services
+- **Template-Driven Expansion**: Use `services/template-service/` for creating new services
+
+### Code Quality Standards
+- **Test-First Development**: Write tests before implementing functionality (non-negotiable)
+- **Clean Architecture**: Follow Hexagonal Architecture, maintain framework-free domain layers
+- **SOLID Principles**: Clear responsibilities, dependency inversion, clean interfaces
+- **Meaningful Names**: Self-documenting code with clear variable and function names
+- **Documentation Currency**: Update docs with any architectural or API changes
+
+### Working Agreements
+- **Dependency Approval**: Always discuss before adding new packages or frameworks
+- **Clarification First**: Ask questions when multiple approaches are possible
+- **Incremental Delivery**: Deliver features in small, reviewable, testable slices
+- **Consistency**: Maintain existing patterns and coding styles throughout the codebase
