@@ -66,5 +66,6 @@ volumes:
   postgres_data:
 
 networks:
-  default:
+  finman-network:
+    external: true
     name: finman-network

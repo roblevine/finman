@@ -31,19 +31,21 @@
 	// }
 
 	"postCreateCommand": "sh .devcontainer/installation.sh",
-	"runArgs": ["--name", "finman_devcontainer", "--network", "finman-network"],
-    "appPort": "2205:22",
+	"runArgs": ["--name", "finman_devcontainer"],
+
 	"remoteUser": "vscode",
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"ms-dotnettools.csdevkit",
-				"ms-ossdata.vscode-pgsql"
+				"ms-ossdata.vscode-pgsql",
+				"ms-vscode-remote.remote-containers",
+				"ms-azuretools.vscode-containers"
 			]
 		}
 	}
 
 	// Configure tool-specific properties.
 	// "customizations": {},
-
+	
 }

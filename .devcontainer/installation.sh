@@ -26,11 +26,17 @@ else
     echo "to enable SSH access, create $SSH_KEY_FILE with your public key"
 fi
 
+echo "creating Docker network: finman-network"
+# Create the Docker network if it doesn't exist
+docker network ls | grep -q finman-network || docker network create finman-network
+# Connect the dev container to the network
+docker network connect finman-network finman_devcontainer 2>/dev/null || true
+
 echo "install Claude Code"
 npm install -g @anthropic-ai/claude-code
 
-echo "install Cursor CLI"
-curl https://cursor.com/install -fsS | bash
+#echo "install Cursor CLI"
+#curl https://cursor.com/install -fsS | bash
 
 echo "configure Docker permissions for non-root user"
 # Add vscode user to docker group if it exists
