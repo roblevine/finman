@@ -26,7 +26,7 @@ docker-compose ps postgres
 
 ```bash
 # From devcontainer
-timeout 5 bash -c 'cat < /dev/null > /dev/tcp/postgres/5432' && echo "PostgreSQL ready"
+timeout 5 bash -c 'cat < /dev/null > /dev/tcp/host.docker.internal/5432' && echo "PostgreSQL ready"
 
 # From host (if postgresql-client installed)
 psql -h localhost -p 5432 -U finman -d finman
@@ -69,9 +69,9 @@ services:
 
 ### Network Configuration
 
-- **Network**: `finman-network` (shared between PostgreSQL and devcontainer)
-- **Host Access**: `localhost:5432`
-- **Container Access**: `postgres:5432` (service name resolution)
+- **Network**: `finman-network` (external network for service-to-service communication)
+- **Host Access**: `localhost:5432` (from host machine)
+- **Devcontainer Access**: `host.docker.internal:5432` (from devcontainer to host-published port)
 
 ### Database Schema
 
@@ -109,7 +109,7 @@ CREATE UNIQUE INDEX IX_users_username ON users (username);
 Host={host};Database=finman;Username=finman;Password=finman_dev_password
 
 // From devcontainer
-Host=postgres;Database=finman;Username=finman;Password=finman_dev_password
+Host=host.docker.internal;Database=finman;Username=finman;Password=finman_dev_password
 
 // From host machine  
 Host=localhost;Database=finman;Username=finman;Password=finman_dev_password
@@ -192,7 +192,7 @@ catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex, "email"))
 2. **Verify Connectivity**:
    ```bash
    # From devcontainer
-   timeout 5 bash -c 'cat < /dev/null > /dev/tcp/postgres/5432' && echo "Connected"
+   timeout 5 bash -c 'cat < /dev/null > /dev/tcp/host.docker.internal/5432' && echo "Connected"
    ```
 
 3. **Run Application**:
@@ -335,7 +335,7 @@ docker-compose exec -T postgres psql -U finman -d finman < backup.sql
 1. **From devcontainer**:
    ```bash
    # Test network connectivity
-   timeout 5 bash -c 'cat < /dev/null > /dev/tcp/postgres/5432'
+   timeout 5 bash -c 'cat < /dev/null > /dev/tcp/host.docker.internal/5432'
    
    # Check network membership
    docker network inspect finman-network

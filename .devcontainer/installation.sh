@@ -4,7 +4,7 @@ echo "starting installation script"
 echo "update and install apt packages"
 sudo apt update
 sudo apt upgrade -y
-sudo apt install -y vim iputils-ping dos2unix curl podman-compose ssh
+sudo apt install -y vim iputils-ping dos2unix curl podman-compose ssh postgresql-client    
 
 echo "checking for SSH public key configuration"
 SSH_KEY_FILE=".devcontainer/.ssh-public-key"
