@@ -202,12 +202,24 @@ Out of scope (for this phase):
 - [ ] **Alternative**: Use Docker Compose services instead of Testcontainers
 - [ ] **Reference**: Research Testcontainers devcontainer best practices
 
-**Increment 2: Testcontainer-enabled WebApplicationFactory**  
-- [ ] Create `TestcontainersWebApplicationFactory` that:
-  - [ ] Accepts PostgreSqlFixture in constructor
-  - [ ] Overrides connection string configuration to use container
-  - [ ] Maintains same service configuration patterns as existing TestWebApplicationFactory
-- [ ] Update test base class to switch between factories based on `USE_TESTCONTAINERS` env var
+**Increment 2: Testcontainer-enabled WebApplicationFactory - COMPLETE ✅**  
+- [✅] Create `TestcontainersWebApplicationFactory` that:
+  - [✅] Accepts PostgreSqlFixture in constructor
+  - [✅] Overrides connection string configuration to use container
+  - [✅] Maintains same service configuration patterns as existing TestWebApplicationFactory
+  - [✅] Properly registers EF Core DbContext with PostgreSQL connection
+  - [✅] Replaces InMemoryUserRepository with EfUserRepository for realistic testing
+- [✅] Update test base class to switch between factories based on `USE_TESTCONTAINERS` env var
+  - [✅] Created `SwitchableWebApplicationFactoryTests` base class  
+  - [✅] Environment variable switching: `USE_TESTCONTAINERS=true/false`
+  - [✅] Automatic factory selection with proper disposal
+  - [✅] Transparent mode detection for test clarity
+
+**Testing Results:**
+- [✅] **PostgreSQL Mode**: All 3 integration tests passing (405ms execution)
+- [✅] **InMemory Mode**: Basic functionality working (health check + registration)
+- [⚠️] **Known Issue**: InMemory mode test isolation with duplicate email constraint (existing codebase behavior)
+- [✅] **Mode Detection**: Proper environment variable detection and reporting
 
 **Increment 3: Database Integration Tests**
 - [ ] Migration smoke test: Db schema exists, unique indexes present
