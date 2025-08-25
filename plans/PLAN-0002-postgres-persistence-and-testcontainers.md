@@ -168,19 +168,55 @@ Out of scope (for this phase):
 - [✅] Handle value object conversions properly (EF will use the configured conversions)
 - [✅] Map `DbUpdateException` (unique violations) to domain-specific errors where needed
 
-### Phase 6 – Integration tests (Testcontainers)
-- [ ] Add a shared xUnit fixture implementing `IAsyncLifetime` that:
-  - [ ] Spins up a Postgres 16-alpine container with random host port
-  - [ ] Exposes a connection string
-  - [ ] Applies EF Core migrations before tests run
-- [ ] For web integration tests using `TestWebApplicationFactory`, override configuration to inject the container connection string
-- [ ] Tests to add:
-  - [ ] Migration smoke test: Db schema exists, unique indexes present
-  - [ ] Repository tests:
-    - [ ] Add user (happy path) with value objects
-    - [ ] Duplicate email rejected (unique constraint)
-    - [ ] Duplicate username rejected (unique constraint)
-    - [ ] FindByEmail returns expected user with proper value object reconstruction
+### Phase 6 – Integration tests (Testcontainers) - SWITCHABLE APPROACH
+**Design Decision**: Implement switchable test infrastructure using environment variable `USE_TESTCONTAINERS=true/false` to allow running same tests with InMemory (fast feedback) or PostgreSQL (realistic integration).
+
+**Increment 1: PostgreSQL Testcontainer Fixture - HYBRID APPROACH**
+- [✅] Create `PostgreSqlFixture : IAsyncLifetime` structure (completed)
+- [⚠️] **Docker-in-Docker Issue Discovered**: Testcontainers ResourceReaper fails in devcontainer environment
+  - Error: `no container with ID [id] found in database: no such container`
+  - Common issue with Docker-in-Docker setups in devcontainers
+  - **Current Solution**: Hybrid approach using existing PostgreSQL container for immediate progress
+  - **Future Optimization**: Document proper Testcontainers devcontainer setup for Phase 6B
+
+**Increment 1A: Hybrid PostgreSQL Fixture (Current) - COMPLETE ✅**
+- [✅] Modify `PostgreSqlFixture` to connect to existing PostgreSQL container (`finman-postgres-1`)
+  - **Solution**: Used `host.docker.internal:5432` to reach exposed PostgreSQL port from devcontainer
+  - **Credentials**: `finman/finman_dev_password` from docker-compose.yml configuration
+- [✅] Use dynamic database names for test isolation (`finman_test_{guid}`)
+  - **Implementation**: Each test run creates unique database with GUID suffix
+  - **Isolation**: Complete database-level isolation between test runs
+- [✅] Implement database cleanup after test completion
+  - **Cleanup Process**: Terminates active connections, then drops test database
+  - **Resource Management**: Proper disposal through `IAsyncLifetime.DisposeAsync()`
+- [✅] Add smoke tests to verify functionality
+  - **Tests Added**: `PostgreSqlFixtureTests.cs` with 3 comprehensive tests
+  - **Coverage**: Connection string validation, migration application, schema verification
+  - **Result**: All tests passing (97ms execution time)
+
+**Increment 1B: True Testcontainers Integration (Future)**
+- [ ] **Environment Setup**: Configure devcontainer for proper Docker-in-Docker support
+  - [ ] Add `DOCKER_HOST` configuration for Testcontainers
+  - [ ] Configure ResourceReaper settings for devcontainer compatibility
+  - [ ] Test with `--privileged` mode if needed
+- [ ] **Alternative**: Use Docker Compose services instead of Testcontainers
+- [ ] **Reference**: Research Testcontainers devcontainer best practices
+
+**Increment 2: Testcontainer-enabled WebApplicationFactory**  
+- [ ] Create `TestcontainersWebApplicationFactory` that:
+  - [ ] Accepts PostgreSqlFixture in constructor
+  - [ ] Overrides connection string configuration to use container
+  - [ ] Maintains same service configuration patterns as existing TestWebApplicationFactory
+- [ ] Update test base class to switch between factories based on `USE_TESTCONTAINERS` env var
+
+**Increment 3: Database Integration Tests**
+- [ ] Migration smoke test: Db schema exists, unique indexes present
+- [ ] Repository integration tests (running in both InMemory and PostgreSQL modes):
+  - [ ] Add user (happy path) with value objects
+  - [ ] Duplicate email rejected (unique constraint)  
+  - [ ] Duplicate username rejected (unique constraint)
+  - [ ] FindByEmail returns expected user with proper value object reconstruction
+- [ ] Document how to run tests in both modes
 
 ### Phase 7 – Use case persistence wiring
 - [ ] Update the registration use case to call `IUserRepository` for exists-checks and persistence
